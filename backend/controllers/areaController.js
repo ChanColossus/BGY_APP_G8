@@ -97,10 +97,10 @@ exports.getArea = async (req, res, next) => {
 
     apiFeatures.pagination(resPerPage);
     const area = await apiFeatures.query;
-    let filteredDisasterCount = area.length;
+    let filteredAreaCount = area.length;
     res.status(200).json({
         success: true,
-        filteredDisasterCount,
+        filteredAreaCount,
         areaCount,
         area,
         resPerPage,

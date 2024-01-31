@@ -6,6 +6,7 @@ const cors = require('cors')
 const auth = require('./routes/auth');
 const disaster = require('./routes/disaster');
 const area = require('./routes/area');
+const tool = require('./routes/tool');
 
 app.use(cors())
 app.use(express.json({limit:'50mb'}));
@@ -16,7 +17,7 @@ app.use(cookieParser());
 app.use('/api/v1', auth);
 app.use('/api/v1', disaster);
 app.use('/api/v1', area);
-
+app.use('/api/v1', tool);
 
 
 
