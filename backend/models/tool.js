@@ -5,6 +5,7 @@ const toolSchema = new mongoose.Schema({
       type: String,
       required: [true, 'Please enter barangay name'],
       trim: true,
+      unique: true,
       maxLength: [100, 'Barangay name cannot exceed 100 characters'],
     },
     tdescription: {

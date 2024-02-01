@@ -5,6 +5,7 @@ const disasterSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please enter disaster name'],
         trim: true,
+        unique: true,
         maxLength: [100, 'Disaster name cannot exceed 100 characters']
     },
     description: {
