@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require("../utils/multer");
 const {
-  newTool,getTool
+  newTool,getTool,updateTool,deleteTool
   } = require("../controllers/toolController");
 const { isAuthenticatedUser,authorizeRoles } = require('../middlewares/auth');
 
@@ -16,9 +16,9 @@ router.post(
     newTool
   );
 router.get("/tool", getTool);
-// router
-//   .route("/admin/area/:areaId", isAuthenticatedUser, 
-//   authorizeRoles("admin"))
-//   .put(upload.array("bimages", 10), updateArea)
-//   .delete(deleteArea);
+router
+  .route("/admin/tool/:toolId", isAuthenticatedUser, 
+  authorizeRoles("admin"))
+  .put(upload.array("timages", 10), updateTool)
+  .delete(deleteTool);
 module.exports = router
