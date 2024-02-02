@@ -14,12 +14,15 @@ exports.registerUser = async (req, res, next) => {
   }, (err, res) => {
     console.log(err, res);
   });
-  const { name, email, password, role, contact } = req.body;
+  const { name, email, password, role, contact,work,age,gender } = req.body;
   const user = await User.create({
     name,
     email,
     password,
     contact,
+    age,
+    work,
+    gender,
     avatar: {
       public_id: result.public_id,
       url: result.secure_url

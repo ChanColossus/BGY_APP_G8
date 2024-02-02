@@ -29,6 +29,36 @@ const userSchema = new mongoose.Schema({
         maxLength: [11, 'Contact number cannot exceed 11 characters'],
         default: 0.0
     },
+    age: {
+        type: Number,
+        required: [true, 'Please enter age'],
+        maxLength: [3, 'Age cannot exceed 3 characters'],
+        default: 0.0
+    },
+    gender: {
+        type: String,
+        required: [true, 'Please select gender'],
+        enum: {
+            values: [
+                'Male',
+                'Female',
+                'Rather not say'
+            ],
+            message: 'Please select correct gender'
+        }
+    },
+    work: {
+        type: String,
+        required: [true, 'Please select work'],
+        enum: {
+            values: [
+                'Student',
+                'Teacher',
+                'Others'
+            ],
+            message: 'Please input your work'
+        }
+    },
     avatar: {
         public_id: {
             type: String,
