@@ -53,15 +53,15 @@ exports.getDisaster = async (req, res, next) => {
     .search()
     .filter();
 
-  apiFeatures.pagination(resPerPage);
+  // apiFeatures.pagination(resPerPage);
   const disasters = await apiFeatures.query;
-  let filteredDisasterCount = disasters.length;
+  // let filteredDisasterCount = disasters.length;
   res.status(200).json({
     success: true,
-    filteredDisasterCount,
-    disasterCount,
+    // filteredDisasterCount,
+    // disasterCount,
     disasters,
-    resPerPage,
+    // resPerPage,
   });
 };
 

@@ -35,7 +35,8 @@ function Disaster() {
     // Add other necessary fields
   });
   const [dataRefresh, setDataRefresh] = useState(true);
-
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [updateId, setUpdateId] = useState(null);
   useEffect(() => {
     if (dataRefresh) {
       // Fetch data again
@@ -92,6 +93,12 @@ const settings = {
 
   const openModal = () => {
     setModalOpen(true);
+    setNewDisasterData({
+      name: "",
+      description: "",
+      images: [],
+      // Add other necessary fields
+    });
   };
 
   // Function to close the modal
@@ -129,7 +136,86 @@ const settings = {
       console.error("Error submitting form:", error);
     }
   };
+  const openUpdateModal = async (row) => {
+    try {
+      if (!row || !row._id) {
+        console.error("Invalid row or row id:", row);
+        return;
+      }
   
+      console.log("Fetching old data for ID:", row._id);
+  
+      // Log the URL for debugging
+      const apiUrl = `http://localhost:4001/api/v1/disasters/${row._id}`;
+      console.log("API URL:", apiUrl);
+  
+      // Fetch old data for the selected disaster
+      const response = await axios.get(apiUrl);
+      const oldData = response.data.disaster;
+  
+      // Set the old data to newDisasterData state
+      setNewDisasterData({
+        name: oldData.name,
+        description: oldData.description,
+        images: oldData.images,
+        // Add other necessary fields
+      });
+  
+      // Set the updateId state
+      setUpdateId(row.id);
+  
+      // Open the update modal
+      setUpdateModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching old data:", error);
+    }
+  };
+  
+
+  const closeUpdateModal = () => {
+    setUpdateModalOpen(false);
+    setUpdateId(null); // Reset the updateId state when closing the modal
+  };
+
+  const handleUpdateClick = (row) => {
+    // Call the function to open the update modal
+    openUpdateModal(row);
+  };
+  const handleUpdateSubmit = async (row) => {
+    try {
+      const formData = new FormData();
+      formData.append("name",row._id)
+      formData.append("name", newDisasterData.name);
+      formData.append("description", newDisasterData.description);
+  
+      newDisasterData.images.forEach((image) => {
+        formData.append("images", image);
+      });
+  
+      // Send the form data to the backend for update
+      const response = await axios.put(
+        `http://localhost:4001/api/v1/admin/disaster/${row._id}`, // Replace with the correct endpoint for updating
+        formData
+      );
+  
+      // Handle the response as needed
+      console.log(response.data);
+  
+      // Refresh the data after successful update
+      setDataRefresh(true);
+  
+      // Close the modal after successful submission
+      closeModal();
+    } catch (error) {
+      // Handle errors
+      console.error("Error submitting update:", error);
+    }
+  };
+  
+  const handleDeleteClick = (row) => {
+    // Implement logic for deleting the disaster
+    console.log('Delete clicked for:', row);
+  };
   return (
     <>
       <div className="content">
@@ -185,21 +271,79 @@ const settings = {
           onChange={handleImageChange}
           accept="image/*"
         />
-        {/* Display preview of uploaded images */}
-        {newDisasterData.images &&
-          newDisasterData.images.map((image, index) => (
-            <img
-              key={index}
-              src={URL.createObjectURL(image)}
-              alt={`Image ${index + 1}`}
-              style={{ width: "100px", height: "auto", marginRight: "10px" }}
-            />
-          ))}
+       {/* Display preview of uploaded images */}
+{newDisasterData.images &&
+  newDisasterData.images.map((image, index) => (
+    <img
+      key={index}
+      src={image.url} 
+      alt={`Image ${index + 1}`}
+      style={{ width: "100px", height: "auto", marginRight: "10px" }}
+    />
+  ))}
       </FormGroup>
 
       {/* Submit button */}
       <Button color="primary" onClick={handleFormSubmit}>
         Submit
+      </Button>
+    </Form>
+  </ModalBody>
+  {/* ... (previous code) */}
+</Modal>
+<Modal isOpen={updateModalOpen} toggle={closeUpdateModal} className="modal-lg">
+  <ModalHeader toggle={closeUpdateModal}>Update Disaster</ModalHeader>
+  <ModalBody>
+    <Form>
+      <FormGroup>
+        <Label for="name">Name</Label>
+        <Input
+          type="text"
+          id="name"
+          value={newDisasterData.name}
+          onChange={(e) =>
+            setNewDisasterData({ ...newDisasterData, name: e.target.value })
+          }
+        />
+      </FormGroup>
+      <FormGroup>
+        <Label for="description">Description</Label>
+        <Input
+          type="textarea"
+          id="description"
+          value={newDisasterData.description}
+          onChange={(e) =>
+            setNewDisasterData({
+              ...newDisasterData,
+              description: e.target.value,
+            })
+          }
+        />
+      </FormGroup>
+      <FormGroup>
+        <Label for="images">Images</Label>
+        <Input
+          type="file"
+          id="images"
+          multiple
+          onChange={handleImageChange}
+          accept="image/*"
+        />
+       {/* Display preview of uploaded images */}
+{newDisasterData.images &&
+  newDisasterData.images.map((image, index) => (
+    <img
+      key={index}
+      src={image.url}
+      alt={`Image ${index + 1}`}
+      style={{ width: "100px", height: "auto", marginRight: "10px" }}
+    />
+  ))}
+      </FormGroup>
+
+      {/* Submit button */}
+      <Button color="primary" onClick={handleUpdateSubmit}>
+        Update
       </Button>
     </Form>
   </ModalBody>
@@ -234,6 +378,24 @@ const settings = {
                         </td>
                         <td>{row.name}</td>
                         <td>{row.description}</td>
+                        <td>
+        {/* Update Button */}
+        <Button
+          color="info"
+          onClick={() => handleUpdateClick(row)}
+        >
+          Update
+        </Button>
+      </td>
+      <td>
+        {/* Delete Button */}
+        <Button
+          color="danger"
+          onClick={() => handleDeleteClick(row)}
+        >
+          Delete
+        </Button>
+      </td>
                       </tr>
                     ))}
                   </tbody>

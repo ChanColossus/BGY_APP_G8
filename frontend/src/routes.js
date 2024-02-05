@@ -16,15 +16,15 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import Dashboard from "views/Dashboard.js";
-import Disaster from "views/Disaster.js";
-import Notifications from "views/Notifications.js";
-import Icons from "views/Icons.js";
-import Typography from "views/Typography.js";
-import TableList from "views/Tables.js";
-import Maps from "views/Map.js";
-import UserPage from "views/User.js";
-import UpgradeToPro from "views/Upgrade.js";
+import Dashboard from "views/Admin/Dashboard.js";
+import Disaster from "views/Admin/Disaster.js";
+import Notifications from "views/Admin/Notifications.js";
+import Icons from "views/Admin/Icons.js";
+import Typography from "views/Admin/Typography.js";
+import TableList from "views/Admin/Tables.js";
+import Maps from "views/Admin/Map.js";
+import UserPage from "views/Admin/User.js";
+import UpgradeToPro from "views/Admin/Upgrade.js";
 
 var routes = [
   {
@@ -91,5 +91,6 @@ var routes = [
     component: <Disaster />,
     layout: "/admin",
   },
+ 
 ];
 export default routes;

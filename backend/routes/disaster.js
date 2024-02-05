@@ -16,8 +16,9 @@ router.post(
   );
 router.get("/disasters", getDisaster);
 router
-  .route("/admin/disaster/:id", isAuthenticatedUser, 
-  authorizeRoles("admin"))
+  .route("/admin/disaster/:id") 
+  // isAuthenticatedUser, 
+  // authorizeRoles("admin"))
   .put(upload.array("images", 10), updateDisaster)
   .delete(deleteDisaster);
 router.get("/disasters/:id", getSingleDisaster);
