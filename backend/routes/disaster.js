@@ -9,8 +9,8 @@ const { isAuthenticatedUser,authorizeRoles } = require('../middlewares/auth');
 
 router.post(
     "/admin/disaster/new",
-    isAuthenticatedUser,
-    authorizeRoles("admin"),
+    // isAuthenticatedUser,
+    // authorizeRoles("admin"),
     upload.array("images", 10),
     newDisaster
   );
