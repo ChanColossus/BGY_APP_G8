@@ -2,7 +2,12 @@ const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
-
+const corsOptions = {
+    origin: 'http://localhost:3000', // Replace with your frontend URL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+    optionsSuccessStatus: 204,
+  };
 const auth = require('./routes/auth');
 const disaster = require('./routes/disaster');
 const area = require('./routes/area');
@@ -11,7 +16,7 @@ const quiz = require('./routes/quiz');
 const igRoutes = require('./routes/ig');
 
 
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(express.json({limit:'50mb'}));
 app.use(express.urlencoded({limit: "50mb", extended: true }));
 app.use(cookieParser());

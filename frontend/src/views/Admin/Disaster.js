@@ -37,6 +37,7 @@ function Disaster() {
   const [dataRefresh, setDataRefresh] = useState(true);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updateId, setUpdateId] = useState(null);
+
   useEffect(() => {
     if (dataRefresh) {
       // Fetch data again
@@ -107,6 +108,27 @@ const settings = {
   };
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
+    const imagePreviews = [];
+  
+    const readAndPreview = (file) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        imagePreviews.push(event.target.result);
+        setNewDisasterData({
+          ...newDisasterData,
+          images: imagePreviews,
+        });
+      };
+  
+      reader.readAsDataURL(file);
+    };
+  
+    files.forEach(readAndPreview);
+  };
+ 
+  const handleImageChangeCreate = (e) => {
+    const files = Array.from(e.target.files);
     setNewDisasterData({
       ...newDisasterData,
       images: files,
@@ -137,6 +159,7 @@ const settings = {
     }
   };
   const openUpdateModal = async (row) => {
+    console.log(row._id)
     try {
       if (!row || !row._id) {
         console.error("Invalid row or row id:", row);
@@ -152,7 +175,7 @@ const settings = {
       // Fetch old data for the selected disaster
       const response = await axios.get(apiUrl);
       const oldData = response.data.disaster;
-  
+      
       // Set the old data to newDisasterData state
       setNewDisasterData({
         name: oldData.name,
@@ -160,9 +183,9 @@ const settings = {
         images: oldData.images,
         // Add other necessary fields
       });
-  
+
       // Set the updateId state
-      setUpdateId(row.id);
+      setUpdateId(row._id);
   
       // Open the update modal
       setUpdateModalOpen(true);
@@ -181,34 +204,43 @@ const settings = {
     // Call the function to open the update modal
     openUpdateModal(row);
   };
-  const handleUpdateSubmit = async (row) => {
+  const handleUpdateSubmit = async () => {
     try {
       const formData = new FormData();
-      formData.append("name",row._id)
       formData.append("name", newDisasterData.name);
       formData.append("description", newDisasterData.description);
   
-      newDisasterData.images.forEach((image) => {
-        formData.append("images", image);
-      });
+      if (Array.isArray(newDisasterData.images)) {
+        newDisasterData.images.forEach((image, index) => {
+          // Check if the image is a file object
+          if (image instanceof File) {
+            formData.append(`images[${index}]`, image);
+          } else if (typeof image === 'string') {
+            // If it's a string (link), append it directly to the form data
+            formData.append(`images[${index}]`, image);
+          }
+        });
+      }
+      console.log(formData);
   
-      // Send the form data to the backend for update
+      // Send the form data to the backend for update, using the updateId state
       const response = await axios.put(
-        `http://localhost:4001/api/v1/admin/disaster/${row._id}`, // Replace with the correct endpoint for updating
+        `http://localhost:4001/api/v1/admin/disaster/${updateId}`,
         formData
       );
   
       // Handle the response as needed
       console.log(response.data);
-  
+      closeUpdateModal();
       // Refresh the data after successful update
       setDataRefresh(true);
   
       // Close the modal after successful submission
-      closeModal();
+      
     } catch (error) {
       // Handle errors
       console.error("Error submitting update:", error);
+      // You can add additional error handling here, such as displaying an error message to the user
     }
   };
   
@@ -268,19 +300,18 @@ const settings = {
           type="file"
           id="images"
           multiple
-          onChange={handleImageChange}
+          onChange={handleImageChangeCreate}
           accept="image/*"
         />
-       {/* Display preview of uploaded images */}
-{newDisasterData.images &&
-  newDisasterData.images.map((image, index) => (
-    <img
-      key={index}
-      src={image.url} 
-      alt={`Image ${index + 1}`}
-      style={{ width: "100px", height: "auto", marginRight: "10px" }}
-    />
-  ))}
+     {newDisasterData.images &&
+    newDisasterData.images.map((file, index) => (
+      <img
+        key={index}
+        src={URL.createObjectURL(file)}
+        alt={`Image ${index + 1}`}
+        style={{ width: "100px", height: "auto", marginRight: "10px" }}
+      />
+    ))}
       </FormGroup>
 
       {/* Submit button */}
@@ -330,15 +361,20 @@ const settings = {
           accept="image/*"
         />
        {/* Display preview of uploaded images */}
-{newDisasterData.images &&
-  newDisasterData.images.map((image, index) => (
-    <img
-      key={index}
-      src={image.url}
-      alt={`Image ${index + 1}`}
-      style={{ width: "100px", height: "auto", marginRight: "10px" }}
-    />
-  ))}
+       {
+  newDisasterData.images && newDisasterData.images.length > 0 ? (
+    newDisasterData.images.map((image, index) => (
+      <img
+        key={index}
+        src={typeof image === 'string' ? image : image.url}
+        alt={`Image ${index + 1}`}
+        style={{ width: "100px", height: "auto", marginRight: "10px" }}
+      />
+    ))
+  ) : null
+}
+
+
       </FormGroup>
 
       {/* Submit button */}
