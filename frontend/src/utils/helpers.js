@@ -31,10 +31,10 @@ export const getUser = () => {
 };
 
 // remove token from session storage
-export const logout = next => {
-    if (window !== 'undefined') {
+export const logout = (next) => {
+    if (typeof window !== 'undefined') {
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('user');
+        next(); // Call the callback function to perform redirection
     }
-    next();
 };

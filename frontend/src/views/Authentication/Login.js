@@ -1,13 +1,16 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { authenticate, getUser } from "../../utils/helpers";
 import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from 'reactstrap';
 
+import { UncontrolledAlert } from "reactstrap";
+
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
 
   const login = async () => {
     try {
@@ -22,18 +25,36 @@ const Login = () => {
         config
       );
 
-      console.log(data);
+      // Authenticate user and redirect to dashboard on successful login
       authenticate(data, () => {
-        // Redirect to the desired URL after successful login
-        navigate("/admin/dashboard");
+        setShowAlert(true);
+         // Show the success alert
+        setTimeout(() => {
+          setShowAlert(false); // Hide the success alert after a delay
+          navigate("/admin/dashboard"); // Redirect to dashboard
+        }, 3000); // Hide alert after 3 seconds
       });
     } catch (error) {
       console.error("Invalid user or password", error);
+      // Handle login error (e.g., show error message)
     }
   };
-
+  useEffect(() => {
+    console.log(showAlert); // Log the updated value of showAlert
+  }, [showAlert]);
   return (
     <Fragment>
+         {/* Show the success alert when isLoggedIn is true */}
+     {showAlert && (
+        <UncontrolledAlert
+          className="alert-with-icon"
+          color="info"
+          fade={false}
+        >
+          <span data-notify="icon" className="nc-icon nc-bell-55" />
+          <span data-notify="message">You have successfully logged in. Redirecting please wait...</span>
+        </UncontrolledAlert>
+      )}
       <div className="body" style={{ backgroundColor: "white", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Container className="container-fluid" style={{ paddingTop: "0px" }}>
           <Row className="justify-content-center">
@@ -72,6 +93,7 @@ const Login = () => {
           </Row>
         </Container>
       </div>
+    
     </Fragment>
   );
 };

@@ -38,9 +38,10 @@ import {
 } from "reactstrap";
 import axios from "axios";
 import routes from "routes.js";
-
+import { UncontrolledAlert } from "reactstrap";
 function Header(props) {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
   const [color, setColor] = React.useState("transparent");
   const sidebarToggle = React.useRef();
@@ -92,28 +93,35 @@ function Header(props) {
       sidebarToggle.current.classList.toggle("toggled");
     }
   }, [location]);
+  React.useEffect(() => {
+    console.log(showAlert); // Log the updated value of showAlert
+  }, [showAlert]);
 
   const logoutUser = async () => {
     try {
-      await axios.get(`http://localhost:4001/api/v1/logout`);
+        await axios.get(`http://localhost:4001/api/v1/logout`);
 
-  
-      // Clear user state
-      setUser("");
-  
-      // Redirect to the home page
-      logout(() => navigate("/"));
+        // Clear user state
+        setUser("");
+        logout(() => {
+          setShowAlert(true);
+          setTimeout(() => {
+            setShowAlert(false);
+            ; // Redirect to the home page after logout
+          }, 3000);
+        });
+        navigate("/")
     } catch (error) {
-      // Handle errors if needed
-      console.error("Error logging out:", error);
+        console.error("Error logging out:", error);
     }
-  };
+};
   const logoutHandler = () => {
     logoutUser();
   };
   
   return (
     // add or remove classes depending if we are on full-screen-maps page or not
+    <>
     <Navbar
       color={
         location.pathname.indexOf("full-screen-maps") !== -1 ? "dark" : color
@@ -148,32 +156,16 @@ function Header(props) {
           <span className="navbar-toggler-bar navbar-kebab" />
         </NavbarToggler>
         <Collapse isOpen={isOpen} navbar className="justify-content-end">
-          <form>
-            <InputGroup className="no-border">
-              <Input placeholder="Search..." />
-              <InputGroupAddon addonType="append">
-                <InputGroupText>
-                  <i className="nc-icon nc-zoom-split" />
-                </InputGroupText>
-              </InputGroupAddon>
-            </InputGroup>
-          </form>
+          
           <Nav navbar>
-            <NavItem>
-              <Link to="#pablo" className="nav-link btn-magnify">
-                <i className="nc-icon nc-layout-11" />
-                <p>
-                  <span className="d-lg-none d-md-block">Stats</span>
-                </p>
-              </Link>
-            </NavItem>
+           
             <Dropdown
               nav
               isOpen={dropdownOpen}
               toggle={(e) => dropdownToggle(e)}
             >
               <DropdownToggle caret nav>
-                <i className="nc-icon nc-bell-55" />
+                <i className="nc-icon nc-settings-gear-65" />
                 <p>
                   <span className="d-lg-none d-md-block">Some Actions</span>
                 </p>
@@ -184,18 +176,21 @@ function Header(props) {
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
-            <NavItem>
-              <Link to="#pablo" className="nav-link btn-rotate">
-                <i className="nc-icon nc-settings-gear-65" />
-                <p>
-                  <span className="d-lg-none d-md-block">Account</span>
-                </p>
-              </Link>
-            </NavItem>
           </Nav>
         </Collapse>
       </Container>
     </Navbar>
+    {showAlert && (
+        <UncontrolledAlert
+          className="alert-with-icon"
+          color="info"
+          fade={false}
+        >
+          <span data-notify="icon" className="nc-icon nc-bell-55" />
+          <span data-notify="message">You have successfully logged out. Redirecting please wait...</span>
+        </UncontrolledAlert>
+      )}
+    </>
   );
 }
 

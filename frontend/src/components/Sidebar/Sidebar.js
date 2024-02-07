@@ -70,21 +70,23 @@ function Sidebar(props) {
       </div>
       <div className="sidebar-wrapper" ref={sidebar}>
         <Nav>
-          {props.routes.map((prop, key) => {
-            return (
-              <li
-                className={
-                  activeRoute(prop.path) + (prop.pro ? " active-pro" : "")
-                }
-                key={key}
-              >
-                <NavLink to={prop.layout + prop.path} className="nav-NavLink">
-                  <i className={prop.icon} />
-                  <p>{prop.name}</p>
-                </NavLink>
-              </li>
-            );
-          })}
+        {props.routes
+  // Filter out routes excluding "Login" and "Register"
+  .filter((prop) => prop.name !== "Login" && prop.name !== "Register")
+  // Map through the filtered routes
+  .map((prop, key) => (
+    <li
+      className={activeRoute(prop.path) + (prop.pro ? " active-pro" : "")}
+      key={key}
+    >
+      <NavLink to={prop.layout + prop.path} className="nav-NavLink">
+        <i className={prop.icon} />
+        <p>{prop.name}</p>
+      </NavLink>
+    </li>
+  ))}
+
+
         </Nav>
       </div>
     </div>
