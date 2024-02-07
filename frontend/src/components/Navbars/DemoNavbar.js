@@ -16,8 +16,9 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation,useNavigate } from "react-router-dom";
+import { getUser, logout } from "../../utils/helpers";
 import {
   Collapse,
   Navbar,
@@ -35,7 +36,7 @@ import {
   InputGroupAddon,
   Input,
 } from "reactstrap";
-
+import axios from "axios";
 import routes from "routes.js";
 
 function Header(props) {
@@ -55,6 +56,8 @@ function Header(props) {
   const dropdownToggle = (e) => {
     setDropdownOpen(!dropdownOpen);
   };
+  const navigate = useNavigate();
+  const [user, setUser] = useState("");
   const getBrand = () => {
     let brandName = "Default Brand";
     routes.map((prop, key) => {
@@ -89,6 +92,26 @@ function Header(props) {
       sidebarToggle.current.classList.toggle("toggled");
     }
   }, [location]);
+
+  const logoutUser = async () => {
+    try {
+      await axios.get(`http://localhost:4001/api/v1/logout`);
+
+  
+      // Clear user state
+      setUser("");
+  
+      // Redirect to the home page
+      logout(() => navigate("/"));
+    } catch (error) {
+      // Handle errors if needed
+      console.error("Error logging out:", error);
+    }
+  };
+  const logoutHandler = () => {
+    logoutUser();
+  };
+  
   return (
     // add or remove classes depending if we are on full-screen-maps page or not
     <Navbar
@@ -156,9 +179,9 @@ function Header(props) {
                 </p>
               </DropdownToggle>
               <DropdownMenu right>
-                <DropdownItem tag="a">Action</DropdownItem>
-                <DropdownItem tag="a">Another Action</DropdownItem>
-                <DropdownItem tag="a">Something else here</DropdownItem>
+              <DropdownItem tag={Link} to="/" onClick={logoutHandler}>
+                  Logout
+                </DropdownItem>
               </DropdownMenu>
             </Dropdown>
             <NavItem>

@@ -82,9 +82,16 @@ const userSchema = new mongoose.Schema({
 })
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
-        next()
+        return next(); // Return early if password is not modified
     }
-    this.password = await bcrypt.hash(this.password, 10)
+    try {
+        this.password = await bcrypt.hash(this.password, 10);
+        console.log('Password hashed successfully',this.password);
+        next(); // Call next to proceed with saving the document
+    } catch (error) {
+        console.error('Error hashing password:', error);
+        next(error); // Pass the error to the next middleware or route handler
+    }
 });
 
 userSchema.methods.getJwtToken = function () {
@@ -92,10 +99,20 @@ userSchema.methods.getJwtToken = function () {
         expiresIn: process.env.JWT_EXPIRES_TIME
     });
 }
-
 userSchema.methods.comparePassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password)
-}
+    try {
+        console.log("Entered Password:", enteredPassword);
+        console.log("Stored Hashed Password:", this.password);
+        const isMatch = await bcrypt.compare(enteredPassword, this.password);
+        console.log("Password Match:", isMatch);
+        return isMatch;
+    } catch (error) {
+        console.error("Error comparing passwords:", error);
+        return false; // Return false in case of any error
+    }
+};
+
+  
 
 userSchema.methods.getResetPasswordToken = function () {
     // Generate token
@@ -110,36 +127,7 @@ userSchema.methods.getResetPasswordToken = function () {
     return resetToken
 
 }
-userSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) {
-        next()
-    }
-    this.password = await bcrypt.hash(this.password, 10)
-});
 
-userSchema.methods.getJwtToken = function () {
-    return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_TIME
-    });
-}
-
-userSchema.methods.comparePassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword, this.password)
-}
-
-userSchema.methods.getResetPasswordToken = function () {
-    // Generate token
-    const resetToken = crypto.randomBytes(20).toString('hex');
-
-    // Hash and set to resetPasswordToken
-    this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex')
-
-    // Set token expire time
-    this.resetPasswordExpire = Date.now() + 30 * 60 * 1000
-
-    return resetToken
-
-}
 module.exports = mongoose.model('User', userSchema);
 
 

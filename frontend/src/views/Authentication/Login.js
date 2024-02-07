@@ -21,6 +21,7 @@ const Login = () => {
         { email, password },
         config
       );
+
       console.log(data);
       authenticate(data, () => {
         // Redirect to the desired URL after successful login
