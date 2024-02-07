@@ -26,6 +26,10 @@ import Maps from "views/Admin/Map.js";
 import UserPage from "views/Admin/User.js";
 import UpgradeToPro from "views/Admin/Upgrade.js";
 
+import Login from "views/Authentication/Login.js";
+import Register from "views/Authentication/Register.js";
+
+
 var routes = [
   {
     path: "/dashboard",
@@ -91,6 +95,19 @@ var routes = [
     component: <Disaster />,
     layout: "/admin",
   },
- 
+  {
+    path: "/login",
+    name: "Login",
+    icon: "nc-icon nc-globe",
+    component: <Login />,
+    layout: "/auth",
+  },
+  {
+    path: "/register",
+    name: "Register",
+    icon: "nc-icon nc-globe",
+    component: <Register />,
+    layout: "/auth",
+  },
 ];
 export default routes;

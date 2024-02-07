@@ -205,9 +205,26 @@ function Disaster() {
     files.forEach(readAndPreview);
   };
 
-  const handleDeleteClick = (row) => {
-    // Implement logic for deleting the disaster
-    console.log('Delete clicked for:', row);
+  const handleDeleteClick = async (row) => {
+    try {
+      // Send a DELETE request to the backend API
+      const response = await axios.delete(`http://localhost:4001/api/v1/admin/disaster/${row._id}`);
+      
+      // Check if the deletion was successful
+      if (response.data.success) {
+        // Remove the deleted disaster from the state or refresh the data
+        setDataRefresh(true); // Assuming you have a state variable to trigger data refresh
+        
+        // Log success message
+        console.log(response.data.message);
+      } else {
+        // Handle failure scenario
+        console.error("Failed to delete disaster:", response.data.message);
+      }
+    } catch (error) {
+      // Handle network or other errors
+      console.error("Error deleting disaster:", error);
+    }
   };
   return (
     <>

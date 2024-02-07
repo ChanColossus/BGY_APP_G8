@@ -1,5 +1,5 @@
 
-import 'react-toastify/dist/ReactToastify.css';
+
 export const authenticate = (data, next) => {
     if (window !== 'undefined') {
         // console.log('authenticate', response)
