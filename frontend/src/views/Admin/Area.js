@@ -24,7 +24,7 @@ import {
 } from "reactstrap";
 import { Carousel } from 'react-bootstrap';
 
-function Disaster() {
+function Area() {
   const [tableData, setTableData] = useState({});
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -40,14 +40,14 @@ function Disaster() {
   useEffect(() => {
     if (dataRefresh) {
       // Fetch data again
-      fetch("http://localhost:4001/api/v1/disasters")
+      fetch("http://localhost:4001/api/v1/area")
         .then((response) => {
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
           return response.json();
         })
-        .then((data) => setTableData(data.disasters))
+        .then((data) => setTableData(data.area))
         .catch((error) => {
           console.error("Error fetching data:", error);
           setError(error.message);
@@ -58,7 +58,7 @@ function Disaster() {
     }
   }, [dataRefresh]);
   console.log(tableData)
-  console.log(tableData.disasters)
+  console.log(tableData.area)
 
   const settings = {
     dots: true,
@@ -122,7 +122,7 @@ function Disaster() {
       newDisasterData.images.forEach((image) => {
         formData.append("images", image);
       });
-      const response = await axios.post("http://localhost:4001/api/v1/admin/disaster/new", formData,config);
+      const response = await axios.post("http://localhost:4001/api/v1/admin/disaster/new", formData, config);
       setDataRefresh(true);
 
       console.log(response.data);
@@ -189,7 +189,7 @@ function Disaster() {
       console.log(formData);
       const response = await axios.put(
         `http://localhost:4001/api/v1/admin/disaster/${updateId}`,
-        formData,config
+        formData, config
       );
       console.log(response.data);
       closeUpdateModal();
@@ -219,6 +219,7 @@ function Disaster() {
     files.forEach(readAndPreview);
   };
 
+  //DELETE FUNCTION
   const handleDeleteClick = async (row) => {
     try {
       const config = {
@@ -228,13 +229,13 @@ function Disaster() {
         },
       };
       // Send a DELETE request to the backend API
-      const response = await axios.delete(`http://localhost:4001/api/v1/admin/disaster/${row._id}`,config);
-      
+      const response = await axios.delete(`http://localhost:4001/api/v1/admin/disaster/${row._id}`, config);
+
       // Check if the deletion was successful
       if (response.data.success) {
         // Remove the deleted disaster from the state or refresh the data
         setDataRefresh(true); // Assuming you have a state variable to trigger data refresh
-        
+
         // Log success message
         console.log(response.data.message);
       } else {
@@ -253,14 +254,14 @@ function Disaster() {
           <Col md="12">
             <Card className="card-plain">
               <CardHeader>
-                <CardTitle tag="h4">Disaster List  <Button color="primary" className="float-right" onClick={openModal}>
-                  New Disaster
+                <CardTitle tag="h4">Area List  <Button color="primary" className="float-right" onClick={openModal}>
+                  New area
                 </Button></CardTitle>
                 <p className="card-category">
-                  A disaster is a serious problem occurring over a period of
-                  time that causes widespread human, material, economic, or
-                  environmental loss, which exceeds the ability of the affected
-                  community or society to cope using its own resources.
+                  Taguig is a landlocked highly urbanized city in the National Capital Region. 
+                  The city has a land area of 45.21 square kilometers or 17.46 square miles. 
+                  Its population as determined by the 2020 Census was 886,722. 
+                 
                 </p>
               </CardHeader>
               <Modal isOpen={modalOpen} toggle={closeModal} className="modal-lg">
@@ -384,6 +385,7 @@ function Disaster() {
                       <th>Images</th>
                       <th>Name</th>
                       <th>Description</th>
+                      <th>Disasters</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -392,7 +394,7 @@ function Disaster() {
 
                         <td>
                           <Carousel  {...settings}>
-                            {row.images.map((image, imageIndex) => (
+                            {row.bimages.map((image, imageIndex) => (
                               <Carousel.Item key={imageIndex}>
                                 <img
                                   className="d-block w-100"
@@ -404,9 +406,20 @@ function Disaster() {
                             ))}
                           </Carousel>
                         </td>
-                        <td>{row.name}</td>
-                        <td>{row.description}</td>
+                        <td>{row.bname}</td>
+                        <td style={{ width: '400px',}}>{row.bdescription}</td>
+                        <td> {/* No specific width for the entire cell */}
+  {row.disasterProne.map((disaster, index) => (
+    <React.Fragment key={`disaster-${index}`}>
+      <div style={{ width: '200px', whiteSpace: 'pre-line' }}>
+        {disaster.name}{index !== row.disasterProne.length - 1 ? ',' : ''}
+      </div>
+    </React.Fragment>
+  ))}
+</td>
+
                         <td>
+                        
 
                           <Button
                             color="info"
@@ -438,4 +451,4 @@ function Disaster() {
   );
 }
 
-export default Disaster;
+export default Area;
