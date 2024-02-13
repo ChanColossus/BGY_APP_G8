@@ -204,3 +204,17 @@ exports.deleteArea = async (req, res, next) => {
         message: "Area deleted",
     });
 };
+exports.getSingleArea = async (req, res, next) => {
+    const area = await Area.findById(req.params.id);
+  
+    if (!area) {
+      return res.status(404).json({
+        success: false,
+        message: "Area not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      area
+    });
+  };
