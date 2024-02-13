@@ -3,6 +3,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { getToken } from "../../utils/helpers";
+import Select from 'react-select';
 import axios from "axios";
 import {
   Card,
@@ -28,33 +29,40 @@ function Area() {
   const [tableData, setTableData] = useState({});
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [newDisasterData, setNewDisasterData] = useState({
+  const [selectedDisasters, setSelectedDisasters] = useState([]);
+  const [newAreaData, setNewAreaData] = useState({
     name: "",
     description: "",
     images: [],
+    disasterProne: []
   });
+  const [disasters, setDisasters] = useState([]);
   const [dataRefresh, setDataRefresh] = useState(true);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updateId, setUpdateId] = useState(null);
 
   useEffect(() => {
-    if (dataRefresh) {
-      // Fetch data again
-      fetch("http://localhost:4001/api/v1/area")
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((data) => setTableData(data.area))
-        .catch((error) => {
-          console.error("Error fetching data:", error);
-          setError(error.message);
-        });
+    const fetchData = async () => {
+      try {
+        // Fetch data again
+        const areaResponse = await fetch("http://localhost:4001/api/v1/area");
+        if (!areaResponse.ok) {
+          throw new Error(`HTTP error! Status: ${areaResponse.status}`);
+        }
+        const areaData = await areaResponse.json();
+        setTableData(areaData.area);
 
-      // Reset the data refresh state
-      setDataRefresh(false);
+
+        // Reset the data refresh state
+        setDataRefresh(false);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(error.message);
+      }
+    };
+
+    if (dataRefresh) {
+      fetchData();
     }
   }, [dataRefresh]);
   console.log(tableData)
@@ -86,23 +94,29 @@ function Area() {
   const dataEntries = Object.entries(tableData);
 
   //CREATE FUNCTIONS
-  const openModal = () => {
-    setModalOpen(true);
-    setNewDisasterData({
-      name: "",
-      description: "",
-      images: [],
-
-    });
+  const openModal = async () => {
+    try {
+      const disastersResponse = await axios.get("http://localhost:4001/api/v1/disasters");
+      setDisasters(disastersResponse.data.disasters); // Assuming the response data has a key named 'disasters'
+      setModalOpen(true);
+      setNewAreaData({
+        bname: "",
+        bdescription: "",
+        bimages: [],
+        disasterProne: [],
+      });
+    } catch (error) {
+      console.error("Error opening modal:", error);
+    }
   };
   const closeModal = () => {
     setModalOpen(false);
   };
   const handleImageChangeCreate = (e) => {
     const files = Array.from(e.target.files);
-    setNewDisasterData({
-      ...newDisasterData,
-      images: files,
+    setNewAreaData({
+      ...newAreaData,
+      bimages: files,
       imagePreviews: files.map((file) => URL.createObjectURL(file)),
     });
   };
@@ -114,15 +128,24 @@ function Area() {
           Authorization: `Bearer ${getToken()}`,
         },
       };
+
       console.log(getToken())
       const formData = new FormData();
-      formData.append("name", newDisasterData.name);
-      formData.append("description", newDisasterData.description);
+      formData.append("bname", newAreaData.bname);
+      formData.append("bdescription", newAreaData.bdescription);
 
-      newDisasterData.images.forEach((image) => {
-        formData.append("images", image);
+
+      newAreaData.disasterProne.forEach((disaster) => {
+        formData.append("disasterNames", disaster);
       });
-      const response = await axios.post("http://localhost:4001/api/v1/admin/disaster/new", formData, config);
+
+      newAreaData.bimages.forEach((image) => {
+        formData.append("bimages", image);
+      });
+      console.log(newAreaData.disasterProne)
+      console.log(newAreaData)
+      const response = await axios.post("http://localhost:4001/api/v1/admin/area/new", formData, config);
+      setSelectedDisasters([]);
       setDataRefresh(true);
 
       console.log(response.data);
@@ -133,92 +156,6 @@ function Area() {
       console.error("Error submitting form:", error);
     }
   };
-
-  //UPDATE FUNCTIONS
-  const openUpdateModal = async (row) => {
-    console.log(row._id)
-    try {
-      if (!row || !row._id) {
-        console.error("Invalid row or row id:", row);
-        return;
-      }
-      console.log("Fetching old data for ID:", row._id);
-      const apiUrl = `http://localhost:4001/api/v1/disasters/${row._id}`;
-      console.log("API URL:", apiUrl);
-      const response = await axios.get(apiUrl);
-      const oldData = response.data.disaster;
-      setNewDisasterData({
-        name: oldData.name,
-        description: oldData.description,
-        images: oldData.images,
-      });
-      setUpdateId(row._id);
-      setUpdateModalOpen(true);
-    } catch (error) {
-      console.error("Error fetching old data:", error);
-    }
-  };
-  const closeUpdateModal = () => {
-    setUpdateModalOpen(false);
-    setUpdateId(null);
-  };
-  const handleUpdateClick = (row) => {
-    openUpdateModal(row);
-  };
-  const handleUpdateSubmit = async () => {
-    try {
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${getToken()}`,
-        },
-      };
-      const formData = new FormData();
-      formData.append("name", newDisasterData.name);
-      formData.append("description", newDisasterData.description);
-
-      if (Array.isArray(newDisasterData.images)) {
-        newDisasterData.images.forEach((image, index) => {
-          if (image instanceof File) {
-            formData.append(`images[${index}]`, image);
-          } else if (typeof image === 'string') {
-            formData.append(`images[${index}]`, image);
-          }
-        });
-      }
-      console.log(formData);
-      const response = await axios.put(
-        `http://localhost:4001/api/v1/admin/disaster/${updateId}`,
-        formData, config
-      );
-      console.log(response.data);
-      closeUpdateModal();
-      setDataRefresh(true);
-    } catch (error) {
-      console.error("Error submitting update:", error);
-    }
-  };
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    const imagePreviews = [];
-
-    const readAndPreview = (file) => {
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        imagePreviews.push(event.target.result);
-        setNewDisasterData({
-          ...newDisasterData,
-          images: imagePreviews,
-        });
-      };
-
-      reader.readAsDataURL(file);
-    };
-
-    files.forEach(readAndPreview);
-  };
-
   //DELETE FUNCTION
   const handleDeleteClick = async (row) => {
     try {
@@ -247,6 +184,19 @@ function Area() {
       console.error("Error deleting disaster:", error);
     }
   };
+
+  const handleSelectChange = (selectedOptions) => {
+    const selectedDisasters = selectedOptions.map(option => option.value);
+
+    // Update newAreaData with selected disasters
+    setNewAreaData({
+      ...newAreaData,
+      disasterProne: selectedDisasters,
+    });
+
+    // Update selectedDisasters state
+    setSelectedDisasters(selectedDisasters);
+  };
   return (
     <>
       <div className="content">
@@ -254,14 +204,14 @@ function Area() {
           <Col md="12">
             <Card className="card-plain">
               <CardHeader>
-                <CardTitle tag="h4">Area List  <Button color="primary" className="float-right" onClick={openModal}>
-                  New area
-                </Button></CardTitle>
+                <CardTitle tag="h4">
+                  Area List{" "}
+                  <Button color="primary" className="float-right" onClick={openModal}>
+                    New area
+                  </Button>
+                </CardTitle>
                 <p className="card-category">
-                  Taguig is a landlocked highly urbanized city in the National Capital Region. 
-                  The city has a land area of 45.21 square kilometers or 17.46 square miles. 
-                  Its population as determined by the 2020 Census was 886,722. 
-                 
+                  Taguig is a landlocked highly urbanized city in the National Capital Region. The city has a land area of 45.21 square kilometers or 17.46 square miles. Its population as determined by the 2020 Census was 886,722.
                 </p>
               </CardHeader>
               <Modal isOpen={modalOpen} toggle={closeModal} className="modal-lg">
@@ -269,26 +219,26 @@ function Area() {
                 <ModalBody>
                   <Form>
                     <FormGroup>
-                      <Label for="name">Name</Label>
+                      <Label for="bname">Name</Label>
                       <Input
                         type="text"
-                        id="name"
-                        value={newDisasterData.name}
+                        id="bname"
+                        value={newAreaData.name}
                         onChange={(e) =>
-                          setNewDisasterData({ ...newDisasterData, name: e.target.value })
+                          setNewAreaData({ ...newAreaData, bname: e.target.value })
                         }
                       />
                     </FormGroup>
                     <FormGroup>
-                      <Label for="description">Description</Label>
+                      <Label for="bdescription">Description</Label>
                       <Input
                         type="textarea"
-                        id="description"
-                        value={newDisasterData.description}
+                        id="bdescription"
+                        value={newAreaData.description}
                         onChange={(e) =>
-                          setNewDisasterData({
-                            ...newDisasterData,
-                            description: e.target.value,
+                          setNewAreaData({
+                            ...newAreaData,
+                            bdescription: e.target.value,
                           })
                         }
                       />
@@ -302,8 +252,8 @@ function Area() {
                         onChange={handleImageChangeCreate}
                         accept="image/*"
                       />
-                      {newDisasterData.imagePreviews &&
-                        newDisasterData.imagePreviews.map((preview, index) => (
+                      {newAreaData.imagePreviews &&
+                        newAreaData.imagePreviews.map((preview, index) => (
                           <img
                             key={index}
                             src={preview}
@@ -311,69 +261,15 @@ function Area() {
                             style={{ width: "100px", height: "auto", marginRight: "10px" }}
                           />
                         ))}
-
                     </FormGroup>
+                    <Select
+                      options={Array.isArray(disasters) ? disasters.map(disaster => ({ value: disaster.name, label: disaster.name })) : []}
+                      value={selectedDisasters.map(disaster => ({ value: disaster, label: disaster }))}
+                      onChange={handleSelectChange}
+                      isMulti
+                    />
                     <Button color="primary" onClick={handleFormSubmit}>
                       Submit
-                    </Button>
-                  </Form>
-                </ModalBody>
-              </Modal>
-              <Modal isOpen={updateModalOpen} toggle={closeUpdateModal} className="modal-lg">
-                <ModalHeader toggle={closeUpdateModal}>Update Disaster</ModalHeader>
-                <ModalBody>
-                  <Form>
-                    <FormGroup>
-                      <Label for="name">Name</Label>
-                      <Input
-                        type="text"
-                        id="name"
-                        value={newDisasterData.name}
-                        onChange={(e) =>
-                          setNewDisasterData({ ...newDisasterData, name: e.target.value })
-                        }
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="description">Description</Label>
-                      <Input
-                        type="textarea"
-                        id="description"
-                        value={newDisasterData.description}
-                        onChange={(e) =>
-                          setNewDisasterData({
-                            ...newDisasterData,
-                            description: e.target.value,
-                          })
-                        }
-                      />
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="images">Images</Label>
-                      <Input
-                        type="file"
-                        id="images"
-                        multiple
-                        onChange={handleImageChange}
-                        accept="image/*"
-                      />
-                      {
-                        newDisasterData.images && newDisasterData.images.length > 0 ? (
-                          newDisasterData.images.map((image, index) => (
-                            <img
-                              key={index}
-                              src={typeof image === 'string' ? image : image.url}
-                              alt={`Image ${index + 1}`}
-                              style={{ width: "100px", height: "auto", marginRight: "10px" }}
-                            />
-                          ))
-                        ) : null
-                      }
-
-
-                    </FormGroup>
-                    <Button color="primary" onClick={handleUpdateSubmit}>
-                      Update
                     </Button>
                   </Form>
                 </ModalBody>
@@ -391,9 +287,8 @@ function Area() {
                   <tbody>
                     {dataEntries.map(([key, row], index) => (
                       <tr key={index}>
-
                         <td>
-                          <Carousel  {...settings}>
+                          <Carousel {...settings}>
                             {row.bimages.map((image, imageIndex) => (
                               <Carousel.Item key={imageIndex}>
                                 <img
@@ -407,29 +302,25 @@ function Area() {
                           </Carousel>
                         </td>
                         <td>{row.bname}</td>
-                        <td style={{ width: '400px',}}>{row.bdescription}</td>
-                        <td> {/* No specific width for the entire cell */}
-  {row.disasterProne.map((disaster, index) => (
-    <React.Fragment key={`disaster-${index}`}>
-      <div style={{ width: '200px', whiteSpace: 'pre-line' }}>
-        {disaster.name}{index !== row.disasterProne.length - 1 ? ',' : ''}
-      </div>
-    </React.Fragment>
-  ))}
-</td>
-
+                        <td style={{ width: '400px', }}>{row.bdescription}</td>
                         <td>
-                        
-
+                          {row.disasterProne.map((disaster, index) => (
+                            <React.Fragment key={`disaster-${index}`}>
+                              <div style={{ width: '200px', whiteSpace: 'pre-line' }}>
+                                {disaster.name}{index !== row.disasterProne.length - 1 ? ',' : ''}
+                              </div>
+                            </React.Fragment>
+                          ))}
+                        </td>
+                        <td>
                           <Button
                             color="info"
-                            onClick={() => handleUpdateClick(row)}
+                            onClick={() => "handleUpdateClick(row)"}
                           >
                             Update
                           </Button>
                         </td>
                         <td>
-
                           <Button
                             color="danger"
                             onClick={() => handleDeleteClick(row)}
@@ -446,7 +337,6 @@ function Area() {
           </Col>
         </Row>
       </div>
-
     </>
   );
 }

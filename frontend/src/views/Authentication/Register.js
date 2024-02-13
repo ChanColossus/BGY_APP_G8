@@ -157,7 +157,7 @@ const Register = () => {
                 </FormGroup>
                 <Button onClick={register} className="buttonforRegister" style={{ fontWeight: "bold", fontSize: "1rem", color: "#ffffff", backgroundColor: "#007bff", marginBottom: "20px" }}>REGISTER</Button>
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <Link to="/login" style={{ color: "#333333", fontWeight: "bold", fontSize: "0.8rem" }}>Already have an account? Login</Link>
+                  <Link to="/auth/login" style={{ color: "#333333", fontWeight: "bold", fontSize: "0.8rem" }}>Already have an account? Login</Link>
                 </div>
               </Form>
             </Col>

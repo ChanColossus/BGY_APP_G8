@@ -10,8 +10,8 @@ const { isAuthenticatedUser,authorizeRoles } = require('../middlewares/auth');
 
 router.post(
     "/admin/area/new",
-    isAuthenticatedUser,
-    authorizeRoles("admin"),
+    // isAuthenticatedUser,
+    // authorizeRoles("admin"),
     upload.array("bimages", 10),
     newArea
   );
