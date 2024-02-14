@@ -46,6 +46,7 @@ function Area() {
     images: [],
     disasterProne: []
   });
+  const [allDisasters, setAllDisasters] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,8 +59,10 @@ function Area() {
         const areaData = await areaResponse.json();
         setTableData(areaData.area);
 
-
+        const response = await axios.get("http://localhost:4001/api/v1/disasters");
+        setAllDisasters(response.data.disasters);
         // Reset the data refresh state
+        console.log("Updated Area Data:", updateAreaData);
         setDataRefresh(false);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -70,7 +73,7 @@ function Area() {
     if (dataRefresh) {
       fetchData();
     }
-  }, [dataRefresh]);
+  }, [dataRefresh,updateAreaData]);
   console.log(tableData)
   console.log(tableData.area)
 
@@ -171,8 +174,15 @@ function Area() {
       const apiUrl = `http://localhost:4001/api/v1/area/${row._id}`;
       console.log("API URL:", apiUrl);
       const response = await axios.get(apiUrl);
-      setUpdateAreaData(response.data.area);
-      console.log(updateAreaData) // Assuming the response data has a key named 'area'
+      // Ensure to set the correct keys for updateAreaData
+      setUpdateAreaData({
+        bname: response.data.area.bname,
+        bdescription: response.data.area.bdescription,
+        bimages: response.data.area.bimages,
+        disasterProne: response.data.area.disasterProne.map(disaster => disaster.name),
+      });
+  
+      console.log(updateAreaData); // This may not reflect the updated state immediately due to closure
       setUpdateModalOpen(true);
     } catch (error) {
       console.error("Error fetching area data for update:", error);
@@ -192,58 +202,71 @@ function Area() {
 
       reader.onload = (event) => {
         imagePreviews.push(event.target.result);
-        setUpdateAreaData({
-          ...updateAreaData,
+        setUpdateAreaData(prevState => ({
+          ...prevState,
           bimages: imagePreviews,
-        });
+        }));
       };
 
       reader.readAsDataURL(file);
     };
 
     files.forEach(readAndPreview);
-  };
+};
   
-  const handleUpdateSubmit = async () => {
-    try {
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${getToken()}`,
-        },
-      };
-  
-      const formData = new FormData();
-      formData.append("name", updateAreaData.name);
-      formData.append("description", updateAreaData.description);
-  
-      updateAreaData.disasterProne.forEach((disaster) => {
-        formData.append("disasterNames", disaster);
+const handleUpdateSubmit = async () => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    };
+
+    const formData = new FormData();
+    formData.append("bname", updateAreaData.bname);
+    formData.append("bdescription", updateAreaData.bdescription);
+
+    updateAreaData.disasterProne.forEach((disaster) => {
+      formData.append("disasterNames", disaster);
+    });
+
+    // Check if new images are uploaded
+    if (Array.isArray(updateAreaData.bimages)) {
+      updateAreaData.bimages.forEach((image, index) => {
+        if (image instanceof File) {
+          formData.append(`bimages[${index}]`, image);
+        } else if (typeof image === 'string') {
+          formData.append(`bimages[${index}]`, image);
+        }
       });
-  
-      updateAreaData.images.forEach((image) => {
-        formData.append("images", image);
-      });
-  
-      const response = await axios.put(`http://localhost:4001/api/v1/admin/area/${updateId}`, formData, config);
-      setDataRefresh(true);
-  
-      console.log(response.data);
-  
-      closeModalUpdate();
-    } catch (error) {
-      console.error("Error submitting update form:", error);
     }
-  };
+
+    const response = await axios.put(`http://localhost:4001/api/v1/admin/area/${updateId}`, formData, config);
+    setDataRefresh(true);
+
+    console.log(formData)
+    console.log(response.data);
+
+    closeModalUpdate();
+  } catch (error) {
+    console.error("Error submitting update form:", error);
+  }
+};
   
   const handleSelectChangeUpdate = (selectedOptions) => {
-    const selectedDisasters = selectedOptions.map(option => option.value);
-  
+    const selectedValues = selectedOptions.map(option => option.value);
     setUpdateAreaData({
       ...updateAreaData,
-      disasterProne: selectedDisasters,
+      disasterProne: selectedValues,
     });
   };
+  
+  // Filter out existing disasters from the available options
+  // Filter out existing disasters from the available options
+const availableDisasters = allDisasters.filter(disaster => !updateAreaData.disasterProne.some(selectedDisaster => selectedDisaster.value === disaster.name));
+
+  
   //DELETE FUNCTION
   const handleDeleteClick = async (row) => {
     try {
@@ -254,7 +277,7 @@ function Area() {
         },
       };
       // Send a DELETE request to the backend API
-      const response = await axios.delete(`http://localhost:4001/api/v1/admin/disaster/${row._id}`, config);
+      const response = await axios.delete(`http://localhost:4001/api/v1/admin/area/${row._id}`, config);
 
       // Check if the deletion was successful
       if (response.data.success) {
@@ -265,11 +288,11 @@ function Area() {
         console.log(response.data.message);
       } else {
         // Handle failure scenario
-        console.error("Failed to delete disaster:", response.data.message);
+        console.error("Failed to delete area:", response.data.message);
       }
     } catch (error) {
       // Handle network or other errors
-      console.error("Error deleting disaster:", error);
+      console.error("Error deleting area:", error);
     }
   };
 
@@ -285,8 +308,11 @@ function Area() {
     // Update selectedDisasters state
     setSelectedDisasters(selectedDisasters);
   };
+  
   return (
     <>
+
+    
       <div className="content">
         <Row>
           <Col md="12">
@@ -367,35 +393,35 @@ function Area() {
                 <ModalBody>
                   <Form>
                     <FormGroup>
-                      <Label for="name">Name</Label>
+                      <Label for="bname">Name</Label>
                       <Input
                         type="text"
-                        id="name"
+                        id="bname"
                         value={updateAreaData.bname}
                         onChange={(e) =>
-                          setUpdateAreaData({ ...updateAreaData, name: e.target.value })
+                          setUpdateAreaData({ ...updateAreaData, bname: e.target.value })
                         }
                       />
                     </FormGroup>
                     <FormGroup>
-                      <Label for="description">Description</Label>
+                      <Label for="bdescription">Description</Label>
                       <Input
                         type="textarea"
-                        id="description"
+                        id="bdescription"
                         value={updateAreaData.bdescription}
                         onChange={(e) =>
                           setUpdateAreaData({
                             ...updateAreaData,
-                            description: e.target.value,
+                            bdescription: e.target.value,
                           })
                         }
                       />
                     </FormGroup>
                     <FormGroup>
-                      <Label for="updateImages">Images</Label>
+                      <Label for="bimages">Images</Label>
                       <Input
                         type="file"
-                        id="updateImages"
+                        id="bimages"
                         multiple
                         onChange={handleImageChangeUpdate}
                         accept="image/*"
@@ -413,12 +439,15 @@ function Area() {
                         ) : null
                       }
                     </FormGroup>
-                    {/* <Select
-                      options={Array.isArray(disasters) ? disasters.map(disaster => ({ value: disaster.name, label: disaster.name })) : []}
-                      value={updateAreaData.disasterProne.map(disaster => ({ value: disaster, label: disaster }))}
-                      onChange={handleSelectChangeUpdate}
-                      isMulti
-                    /> */}
+                    <FormGroup>
+  <Label for="updateDisasters">Disasters</Label>
+  <Select
+    options={availableDisasters.map(disaster => ({ value: disaster.name, label: disaster.name }))}
+    value={updateAreaData.disasterProne.map(disasterName => ({ value: disasterName, label: disasterName }))}
+    onChange={handleSelectChangeUpdate}
+    isMulti
+  />
+</FormGroup>
                     <Button color="primary" onClick={handleUpdateSubmit}>
                       Update
                     </Button>

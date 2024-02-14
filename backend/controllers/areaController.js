@@ -108,11 +108,13 @@ exports.getArea = async (req, res, next) => {
 };
 exports.updateArea = async (req, res, next) => {
     const { areaId } = req.params;
-    const { bname, bdescription, disasterNames, bimages } = req.body;
-    console.log(req.files)
-    console.log(areaId)
+    const { bname, bdescription, disasterNames } = req.body;
+    let bimages = req.body.bimages; // Ensure to parse the incoming images correctly
+    console.log(req.files);
+    console.log(areaId);
 
     try {
+        let area = await Area.findById(areaId);
         // Check if disasterNames is an array
         let disasters;
         if (Array.isArray(disasterNames)) {
@@ -136,33 +138,27 @@ exports.updateArea = async (req, res, next) => {
         }
 
         // Image upload logic (similar to createArea)
-        let bimages = [];
-        if (!req.files) {
-            bimages.push(req.file);
-        } else {
-            bimages = req.files;
-        }
-
-        let bimagesLinks = [];
-
-        for (let i = 0; i < bimages.length; i++) {
-            let bimageDataUri = bimages[i].path;
-
-            try {
-                const result = await cloudinary.v2.uploader.upload(bimageDataUri, {
-                    folder: 'area',
-                    width: 150,
-                    crop: 'scale',
-                });
-
-                bimagesLinks.push({
+        // Check if images are present in the request body
+        if (req.body.bimages !== undefined && req.body.bimages.length > 0) {
+            let imagesLinks = [];
+            // Upload new images to cloudinary
+            for (let i = 0; i < req.body.bimages.length; i++) {
+                const result = await cloudinary.v2.uploader.upload(
+                    req.body.bimages[i],
+                    {
+                        folder: "area",
+                    }
+                );
+                imagesLinks.push({
                     public_id: result.public_id,
                     url: result.secure_url,
                 });
-            } catch (error) {
-                console.log('Error uploading image:', error);
-                return res.status(500).json({ error: 'Error uploading image' });
             }
+
+            bimages = imagesLinks;
+        } else {
+            // If images are not present in the request body, retain the existing images
+            bimages = area.bimages;
         }
 
         // Update the Area with the associated disasters and uploaded images
@@ -175,10 +171,10 @@ exports.updateArea = async (req, res, next) => {
                     disasterProne: disasters.map((disaster) => ({
                         name: disaster.name,
                     })),
-                    bimages: bimagesLinks,
+                    bimages: bimages,
                 },
             },
-            { new: true } // Return the updated document
+            { new: true }
         );
 
         if (!updatedArea) {
@@ -191,6 +187,7 @@ exports.updateArea = async (req, res, next) => {
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+
 exports.deleteArea = async (req, res, next) => {
     const area = await Area.findByIdAndDelete(req.params.areaId);
     if (!area) {
