@@ -329,7 +329,7 @@ const availableDisasters = allDisasters.filter(disaster => !updateAreaData.disas
                 </p>
               </CardHeader>
               <Modal isOpen={modalOpen} toggle={closeModal} className="modal-lg">
-                <ModalHeader toggle={closeModal}>New Disaster</ModalHeader>
+                <ModalHeader toggle={closeModal}>New Area</ModalHeader>
                 <ModalBody>
                   <Form>
                     <FormGroup>
