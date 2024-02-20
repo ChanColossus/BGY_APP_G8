@@ -190,19 +190,23 @@ function Report() {
 
     const handleUpdateSubmit = async () => {
         try {
+            console.log("Data:",updateReportData)
+            const config = {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  Authorization: `Bearer ${getToken()}`,
+                },
+              };
             const formData = {
                 date: updateReportData.date,
                 disaster: updateReportData.disaster,
                 area: updateReportData.area,
                 affectedPersons: updateReportData.affectedPersons,
-                casualties: updateReportData.casualties
+                casualties: updateReportData.casualties,
             };
             // Send the updated data to the backend server
-            const response = await axios.put(`http://localhost:4001/api/v1/admin/report/${updateId}`, formData, {
-                headers: {
-                    Authorization: `Bearer ${getToken()}`
-                }
-            });
+            const response = await axios.put(`http://localhost:4001/api/v1/admin/report/${updateId}`, 
+            formData, config);
 
             // Refresh the data after update
             setDataRefresh(true);
@@ -214,7 +218,32 @@ function Report() {
             console.error("Error submitting form:", error);
         }
     };
+    const handleDeleteClick = async (row) => {
+        try {
+          const config = {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${getToken()}`,
+            },
+          };
 
+          const response = await axios.delete(`http://localhost:4001/api/v1/admin/report/${row._id}`,config);
+          
+     
+          if (response.data.success) {
+
+            setDataRefresh(true); 
+
+            console.log(response.data.message);
+          } else {
+
+            console.error("Failed to delete disaster:", response.data.message);
+          }
+        } catch (error) {
+
+          console.error("Error deleting disaster:", error);
+        }
+      };
     return (
         <>
             <div className="content">
@@ -426,7 +455,7 @@ function Report() {
                                                         Update
                                                     </Button>
                                                 </td>
-                                                {/* <td>
+                                                <td>
 
                                                     <Button
                                                         color="danger"
@@ -434,7 +463,7 @@ function Report() {
                                                     >
                                                         Delete
                                                     </Button>
-                                                </td> */}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>

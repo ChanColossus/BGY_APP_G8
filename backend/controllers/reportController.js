@@ -37,26 +37,37 @@ exports.newReport = async (req, res, next) => {
 };
 
 exports.updateReport = async (req, res, next) => {
-    try {
-     
-      console.log(req.params.id);
-      reports = await Report.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-        useFindandModify: false,
-      });
-  
-      return res.status(200).json({
-        success: true,
-        reports,
-      });
-    } catch (error) {
-      console.error("Error updating report:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
-    }
+  const { id } = req.params;
+  const { affectedPersons, area, date,disaster, casualties } = req.body;
+  console.log(id);
+console.log(req.body)
+  try {
+
+
+      const updatedReport = await Report.findByIdAndUpdate(
+          id,
+          {
+              $set: {
+                  affectedPersons,
+                  area,
+                 date,
+                 disaster,
+                 casualties
+          
+              },
+          },
+          { new: true }
+      );
+
+      if (!updatedReport) {
+          return res.status(404).json({ error: 'Report not found' });
+      }
+
+      return res.json(updatedReport);
+  } catch (error) {
+      console.error('Error updating area:', error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+  }
   };
   exports.getSingleReport = async (req, res, next) => {
     const report = await Report.findById(req.params.id);
@@ -72,3 +83,19 @@ exports.updateReport = async (req, res, next) => {
       report
     });
   };
+  exports.deleteReport = async (req, res, next) => {
+    const { id } = req.params;
+    
+    try {
+        const deletedReport = await Report.findByIdAndDelete(id);
+
+        if (!deletedReport) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
+
+        return res.json({ success: true, message: 'Report deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting report:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
