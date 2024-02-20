@@ -5,11 +5,13 @@ const cors = require('cors')
 
 
 const auth = require('./routes/auth');
+const reports = require('./routes/report');
 const disaster = require('./routes/disaster');
 const area = require('./routes/area');
 const tool = require('./routes/tool');
 const quiz = require('./routes/quiz');
 const igRoutes = require('./routes/ig');
+
 
 
 app.use(cors())
@@ -25,6 +27,7 @@ app.use('/api/v1', area);
 app.use('/api/v1', tool);
 app.use('/api/v1', quiz);
 app.use('/api/v1', igRoutes);
+app.use('/api/v1', reports);
 
 
 

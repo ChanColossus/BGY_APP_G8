@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const DisasterReportSchema = new Schema({
     date: {
         type: Date,
-        required: true
+        default: Date.now
     },
     disaster: {
         type: Schema.Types.ObjectId,
@@ -18,6 +18,10 @@ const DisasterReportSchema = new Schema({
         required: true
     },
     affectedPersons: {
+        type: Number,
+        required: true
+    },
+    casualties: {
         type: Number,
         required: true
     }
