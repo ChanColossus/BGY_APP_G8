@@ -20,6 +20,7 @@ import Dashboard from "views/Admin/Dashboard.js";
 import Disaster from "views/Admin/Disaster.js";
 import Area from "views/Admin/Area.js";
 import Report from "views/Admin/Reports.js";
+
 import Notifications from "views/Admin/Notifications.js";
 import Icons from "views/Admin/Icons.js";
 import Typography from "views/Admin/Typography.js";
@@ -117,5 +118,6 @@ var routes = [
     component: <Register />,
     layout: "/auth",
   },
+
 ];
 export default routes;
