@@ -7,7 +7,7 @@ import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-
+import Disaster from './disaster1.jpg'
 export default function Hero() {
   return (
     <Box
@@ -80,9 +80,9 @@ export default function Hero() {
             width: '100%',
             backgroundImage:
               theme.palette.mode === 'light'
-                ? 'url("/static/images/templates/templates-images/hero-light.png")'
-                : 'url("/static/images/templates/templates-images/hero-dark.png")',
-            backgroundSize: 'cover',
+                ? `url(${Disaster})`
+                : `url(${Disaster})`,
+            backgroundSize: 'contain',
             borderRadius: '10px',
             outline: '1px solid',
             outlineColor:
