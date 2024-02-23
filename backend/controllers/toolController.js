@@ -96,15 +96,15 @@ exports.getTool = async (req, res, next) => {
         .search()
         .filter();
 
-    apiFeatures.pagination(resPerPage);
+    // apiFeatures.pagination(resPerPage);
     const tool = await apiFeatures.query;
-    let filteredToolCount = tool.length;
+    // let filteredToolCount = tool.length;
     res.status(200).json({
         success: true,
-        filteredToolCount,
+        // filteredToolCount,
         toolCount,
         tool,
-        resPerPage,
+        // resPerPage,
     });
 };
 exports.updateTool = async (req, res, next) => {

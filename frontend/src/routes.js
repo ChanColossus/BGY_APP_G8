@@ -19,6 +19,7 @@
 import Dashboard from "views/Admin/Dashboard.js";
 import Disaster from "views/Admin/Disaster.js";
 import Area from "views/Admin/Area.js";
+import Tool from "views/Admin/Tool.js";
 import Report from "views/Admin/Reports.js";
 
 import Notifications from "views/Admin/Notifications.js";
@@ -30,6 +31,7 @@ import UserPage from "views/Admin/User.js";
 import UpgradeToPro from "views/Admin/Upgrade.js";
 
 import Login from "views/Authentication/Login.js";
+
 import Register from "views/Authentication/Register.js";
 
 
@@ -95,6 +97,13 @@ var routes = [
     name: "Area",
     icon: "nc-icon nc-globe",
     component: <Area />,
+    layout: "/admin",
+  },
+  {
+    path: "/tool",
+    name: "Tools",
+    icon: "nc-icon nc-globe",
+    component: <Tool />,
     layout: "/admin",
   },
   {
