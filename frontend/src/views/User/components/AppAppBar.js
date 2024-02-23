@@ -1,6 +1,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
-
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -13,7 +13,8 @@ import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import ToggleColorMode from './ToggleColorMode';
 import DPrepLogo from './Dpreplogo.png'
-
+import {logout } from "../../../utils/helpers";
+import axios from "axios";
 
 const logoStyle = {
   width: '140px',
@@ -23,7 +24,7 @@ const logoStyle = {
 
 function AppAppBar({ mode, toggleColorMode }) {
   const [open, setOpen] = React.useState(false);
-
+  const navigate = useNavigate();
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
   };
@@ -41,7 +42,20 @@ function AppAppBar({ mode, toggleColorMode }) {
       setOpen(false);
     }
   };
+  const logoutUser = async () => {
+  
+    try {
+        await axios.get(`http://localhost:4001/api/v1/logout`);
 
+        // Perform any additional cleanup here if needed
+
+        logout(() => {
+            navigate("/"); // Redirect to the home page after logout
+        });
+    } catch (error) {
+        console.error("Error logging out:", error);
+    }
+};
   return (
     <div>
       <AppBar
@@ -147,8 +161,7 @@ function AppAppBar({ mode, toggleColorMode }) {
                 variant="contained"
                 size="small"
                 component="a"
-                href="/material-ui/getting-started/templates/sign-up/"
-                target="_blank"
+                onClick={logoutUser}
               >
                 Logout
               </Button>
