@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { authenticate, getUser } from "../../utils/helpers";
+import { authenticate, getUserRole } from "../../utils/helpers";
 import { Container, Row, Col, Form, FormGroup, Label, Input, Button } from 'reactstrap';
 
 import { UncontrolledAlert } from "reactstrap";
@@ -12,33 +12,40 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showAlert, setShowAlert] = useState(false);
 
+
   const login = async () => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      const { data } = await axios.post(
-        `http://localhost:4001/api/v1/login`,
-        { email, password },
-        config
-      );
+        const config = {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
 
-      // Authenticate user and redirect to dashboard on successful login
-      authenticate(data, () => {
-        setShowAlert(true);
-         // Show the success alert
-        setTimeout(() => {
-          setShowAlert(false); // Hide the success alert after a delay
-          navigate("/admin/dashboard"); // Redirect to dashboard
-        }, 3000); // Hide alert after 3 seconds
-      });
+        const { data } = await axios.post(
+            `http://localhost:4001/api/v1/login`,
+            { email, password },
+            config
+        );
+
+        // Authenticate user and redirect to dashboard on successful login
+        authenticate(data, () => {
+            setShowAlert(true);
+            // Show the success alert
+            setTimeout(() => {
+                setShowAlert(false); // Hide the success alert after a delay
+                const role = getUserRole(); // Get the role from session storage
+                if (role === 'admin') {
+                    navigate("/admin/dashboard"); // Redirect admin to /admin/dashboard
+                } else {
+                    navigate("/home/user"); // Redirect user to /home/user
+                }
+            }, 3000); // Hide alert after 3 seconds
+        });
     } catch (error) {
-      console.error("Invalid user or password", error);
-      // Handle login error (e.g., show error message)
+        console.error("Invalid user or password", error);
+        // Handle login error (e.g., show error message)
     }
-  };
+};
   useEffect(() => {
     console.log(showAlert); // Log the updated value of showAlert
   }, [showAlert]);

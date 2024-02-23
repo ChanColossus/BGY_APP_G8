@@ -38,3 +38,14 @@ export const logout = (next) => {
         next(); // Call the callback function to perform redirection
     }
 };
+
+export const getUserRole = () => {
+    if (typeof window !== 'undefined') {
+        const userData = sessionStorage.getItem('user');
+        if (userData) {
+            const user = JSON.parse(userData);
+            return user.role;
+        }
+    }
+    return null;
+};
