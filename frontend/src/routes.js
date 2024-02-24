@@ -21,6 +21,7 @@ import Disaster from "views/Admin/Disaster.js";
 import Area from "views/Admin/Area.js";
 import Tool from "views/Admin/Tool.js";
 import Report from "views/Admin/Reports.js";
+import Quiz from "views/Admin/Quiz.js";
 
 import Notifications from "views/Admin/Notifications.js";
 import Icons from "views/Admin/Icons.js";
@@ -111,6 +112,13 @@ var routes = [
     name: "Report",
     icon: "nc-icon nc-globe",
     component: <Report />,
+    layout: "/admin",
+  },
+  {
+    path: "/quiz",
+    name: "Quiz",
+    icon: "nc-icon nc-globe",
+    component: <Quiz />,
     layout: "/admin",
   },
   {
