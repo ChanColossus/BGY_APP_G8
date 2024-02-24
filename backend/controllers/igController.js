@@ -87,3 +87,128 @@ exports.newIg = async (req, res, next) => {
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
+exports.getSingleIg = async (req, res, next) => {
+    const ig = await Ig.findById(req.params.id);
+  
+    if (!ig) {
+      return res.status(404).json({
+        success: false,
+        message: "Infographic not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      ig
+    });
+  };
+  exports.getIg = async (req, res, next) => {
+    // const resPerPage = 4;
+    // const areaCount = await Area.countDocuments();
+    const apiFeatures = new APIFeatures(Ig.find(), req.query)
+        .search()
+        .filter();
+
+    // apiFeatures.pagination(resPerPage);
+    const ig = await apiFeatures.query;
+    // let filteredAreaCount = ig.length;
+    res.status(200).json({
+        success: true,
+        // filteredAreaCount,
+        // areaCount,
+        ig,
+        // resPerPage,
+    });
+};
+exports.deleteIg = async (req, res, next) => {
+    const ig = await Ig.findByIdAndDelete(req.params.id);
+    if (!ig) {
+        return res.status(404).json({
+            success: false,
+            message: "Infographic not found",
+        });
+    }
+    res.status(200).json({
+        success: true,
+        message: "Infographic deleted",
+    });
+};
+exports.updateIg = async (req, res, next) => {
+    const { id } = req.params;
+    const { gname, disasterNames } = req.body;
+    let gimages = req.body.gimages; // Ensure to parse the incoming images correctly
+    console.log(req.files);
+    console.log(id);
+
+    try {
+        let ig = await Ig.findById(id);
+        // Check if disasterNames is an array
+        let disasters;
+        if (Array.isArray(disasterNames)) {
+            // Fetch disasters based on the provided disasterNames
+            disasters = await Disaster.find({ name: { $in: disasterNames } });
+
+            // Check if all provided disasterNames correspond to valid disasters
+            if (disasters.length !== disasterNames.length) {
+                return res.status(400).json({ error: 'Invalid disasterName provided' });
+            }
+        } else {
+            // If disasterNames is not an array, handle it as a single disaster name
+            const singleDisaster = await Disaster.findOne({ name: disasterNames });
+
+            // Check if the single disaster name is valid
+            if (!singleDisaster) {
+                return res.status(400).json({ error: 'Invalid disasterName provided' });
+            }
+
+            disasters = [singleDisaster];
+        }
+
+        // Image upload logic (similar to createArea)
+        // Check if images are present in the request body
+        if (req.body.gimages !== undefined && req.body.gimages.length > 0) {
+            let imagesLinks = [];
+            // Upload new images to cloudinary
+            for (let i = 0; i < req.body.gimages.length; i++) {
+                const result = await cloudinary.v2.uploader.upload(
+                    req.body.gimages[i],
+                    {
+                        folder: "infographics",
+                    }
+                );
+                imagesLinks.push({
+                    public_id: result.public_id,
+                    url: result.secure_url,
+                });
+            }
+
+            gimages = imagesLinks;
+        } else {
+            // If images are not present in the request body, retain the existing images
+            gimages = ig.gimages;
+        }
+
+        // Update the Area with the associated disasters and uploaded images
+        const updatedIg = await Ig.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    gname,
+                    disasterProne: disasters.map((disaster) => ({
+                        name: disaster.name,
+                    })),
+                    gimages: gimages,
+                },
+            },
+            { new: true }
+        );
+
+        if (!updatedIg) {
+            return res.status(404).json({ error: 'Ig not found' });
+        }
+
+        return res.json(updatedIg);
+    } catch (error) {
+        console.error('Error updating Ig:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};

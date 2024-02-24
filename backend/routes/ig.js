@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require("../utils/multer");
 const {
-  newIg
+  newIg,getIg,getSingleIg,deleteIg,updateIg
 } = require("../controllers/igController");
 const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
@@ -12,10 +12,11 @@ router.post(
   upload.array("gimages", 10),
   newIg
 );
-// router.get("/area", getArea);    
-// router
-//   .route("/admin/area/:areaId", isAuthenticatedUser, 
-//   authorizeRoles("admin"))
-//   .put(upload.array("bimages", 10), updateArea)
-//   .delete(deleteArea);
+router.get("/ig", getIg);    
+router.get("/ig/:id", getSingleIg);
+router
+  .route("/admin/ig/:id", isAuthenticatedUser, 
+  authorizeRoles("admin"))
+  .put(upload.array("gimages", 10), updateIg)
+  .delete(deleteIg);
 module.exports = router

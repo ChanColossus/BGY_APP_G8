@@ -22,13 +22,14 @@ import Area from "views/Admin/Area.js";
 import Tool from "views/Admin/Tool.js";
 import Report from "views/Admin/Reports.js";
 import Quiz from "views/Admin/Quiz.js";
+import Infographic from "views/Admin/Infographic.js";
 
 import Notifications from "views/Admin/Notifications.js";
 import Icons from "views/Admin/Icons.js";
 import Typography from "views/Admin/Typography.js";
 import TableList from "views/Admin/Tables.js";
 import Maps from "views/Admin/Map.js";
-import UserPage from "views/Admin/User.js";
+import UserPage from "views/Admin/Profile.js";
 import UpgradeToPro from "views/Admin/Upgrade.js";
 
 import Login from "views/Authentication/Login.js";
@@ -65,13 +66,13 @@ var routes = [
   //   component: <Notifications />,
   //   layout: "/admin",
   // },
-  // {
-  //   path: "/user-page",
-  //   name: "User Profile",
-  //   icon: "nc-icon nc-single-02",
-  //   component: <UserPage />,
-  //   layout: "/admin",
-  // },
+  {
+    path: "/user-page",
+    name: "User Profile",
+    icon: "nc-icon nc-single-02",
+    component: <UserPage />,
+    layout: "/admin",
+  },
   // {
   //   path: "/tables",
   //   name: "Table List",
@@ -119,6 +120,13 @@ var routes = [
     name: "Quiz",
     icon: "nc-icon nc-globe",
     component: <Quiz />,
+    layout: "/admin",
+  },
+  {
+    path: "/infographic",
+    name: "Infographic",
+    icon: "nc-icon nc-globe",
+    component: <Infographic />,
     layout: "/admin",
   },
   {
