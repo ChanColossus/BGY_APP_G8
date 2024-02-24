@@ -23,6 +23,7 @@ import Tool from "views/Admin/Tool.js";
 import Report from "views/Admin/Reports.js";
 import Quiz from "views/Admin/Quiz.js";
 import Infographic from "views/Admin/Infographic.js";
+import Media from "views/Admin/Media.js";
 
 import Notifications from "views/Admin/Notifications.js";
 import Icons from "views/Admin/Icons.js";
@@ -127,6 +128,13 @@ var routes = [
     name: "Infographic",
     icon: "nc-icon nc-globe",
     component: <Infographic />,
+    layout: "/admin",
+  },
+  {
+    path: "/media",
+    name: "Media",
+    icon: "nc-icon nc-globe",
+    component: <Media />,
     layout: "/admin",
   },
   {
