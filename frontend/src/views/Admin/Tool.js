@@ -168,134 +168,134 @@ function Tool() {
   };
 
    //UPDATE FUNCTIONS
-//    const handleUpdateClick = async (row) => {
-//     setUpdateId(row._id);
-//     try {
+   const handleUpdateClick = async (row) => {
+    setUpdateId(row._id);
+    try {
       
-//       const apiUrl = `http://localhost:4001/api/v1/area/${row._id}`;
-//       console.log("API URL:", apiUrl);
-//       const response = await axios.get(apiUrl);
-//       // Ensure to set the correct keys for updateAreaData
-//       setUpdateAreaData({
-//         bname: response.data.area.bname,
-//         bdescription: response.data.area.bdescription,
-//         bimages: response.data.area.bimages,
-//         disasterProne: response.data.area.disasterProne.map(disaster => disaster.name),
-//       });
+      const apiUrl = `http://localhost:4001/api/v1/tool/${row._id}`;
+      console.log("API URL:", apiUrl);
+      const response = await axios.get(apiUrl);
+      // Ensure to set the correct keys for updateAreaData
+      setUpdateToolData({
+        tname: response.data.tool.tname,
+        tdescription: response.data.tool.tdescription,
+        timages: response.data.tool.timages,
+        disasterTool: response.data.tool.disasterTool.map(disaster => disaster.name),
+      });
   
-//       console.log(updateAreaData); // This may not reflect the updated state immediately due to closure
-//       setUpdateModalOpen(true);
-//     } catch (error) {
-//       console.error("Error fetching area data for update:", error);
-//     }
-//   };
+      console.log(updateToolData); // This may not reflect the updated state immediately due to closure
+      setUpdateModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching tool data for update:", error);
+    }
+  };
   
-//   const closeModalUpdate = () => {
-//     setUpdateModalOpen(false);
-//   };
+  const closeModalUpdate = () => {
+    setUpdateModalOpen(false);
+  };
   
-//   const handleImageChangeUpdate = (e) => {
-//     const files = Array.from(e.target.files);
-//     const imagePreviews = [];
+  const handleImageChangeUpdate = (e) => {
+    const files = Array.from(e.target.files);
+    const imagePreviews = [];
 
-//     const readAndPreview = (file) => {
-//       const reader = new FileReader();
+    const readAndPreview = (file) => {
+      const reader = new FileReader();
 
-//       reader.onload = (event) => {
-//         imagePreviews.push(event.target.result);
-//         setUpdateAreaData(prevState => ({
-//           ...prevState,
-//           bimages: imagePreviews,
-//         }));
-//       };
+      reader.onload = (event) => {
+        imagePreviews.push(event.target.result);
+        setUpdateToolData(prevState => ({
+          ...prevState,
+          timages: imagePreviews,
+        }));
+      };
 
-//       reader.readAsDataURL(file);
-//     };
+      reader.readAsDataURL(file);
+    };
 
-//     files.forEach(readAndPreview);
-// };
+    files.forEach(readAndPreview);
+};
   
-// const handleUpdateSubmit = async () => {
-//   try {
-//     const config = {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//         Authorization: `Bearer ${getToken()}`,
-//       },
-//     };
+const handleUpdateSubmit = async () => {
+  try {
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    };
 
-//     const formData = new FormData();
-//     formData.append("bname", updateAreaData.bname);
-//     formData.append("bdescription", updateAreaData.bdescription);
+    const formData = new FormData();
+    formData.append("tname", updateToolData.tname);
+    formData.append("tdescription", updateToolData.tdescription);
 
-//     updateAreaData.disasterProne.forEach((disaster) => {
-//       formData.append("disasterNames", disaster);
-//     });
+    updateToolData.disasterTool.forEach((disaster) => {
+      formData.append("disasterNames", disaster);
+    });
 
-//     // Check if new images are uploaded
-//     if (Array.isArray(updateAreaData.bimages)) {
-//       updateAreaData.bimages.forEach((image, index) => {
-//         if (image instanceof File) {
-//           formData.append(`bimages[${index}]`, image);
-//         } else if (typeof image === 'string') {
-//           formData.append(`bimages[${index}]`, image);
-//         }
-//       });
-//     }
+    // Check if new images are uploaded
+    if (Array.isArray(updateToolData.timages)) {
+      updateToolData.timages.forEach((image, index) => {
+        if (image instanceof File) {
+          formData.append(`timages[${index}]`, image);
+        } else if (typeof image === 'string') {
+          formData.append(`timages[${index}]`, image);
+        }
+      });
+    }
 
-//     const response = await axios.put(`http://localhost:4001/api/v1/admin/area/${updateId}`, formData, config);
-//     setDataRefresh(true);
+    const response = await axios.put(`http://localhost:4001/api/v1/admin/tool/${updateId}`, formData, config);
+    setDataRefresh(true);
 
-//     console.log(formData)
-//     console.log(response.data);
+    console.log(formData)
+    console.log(response.data);
 
-//     closeModalUpdate();
-//   } catch (error) {
-//     console.error("Error submitting update form:", error);
-//   }
-// };
+    closeModalUpdate();
+  } catch (error) {
+    console.error("Error submitting update form:", error);
+  }
+};
   
-//   const handleSelectChangeUpdate = (selectedOptions) => {
-//     const selectedValues = selectedOptions.map(option => option.value);
-//     setUpdateAreaData({
-//       ...updateAreaData,
-//       disasterProne: selectedValues,
-//     });
-//   };
+  const handleSelectChangeUpdate = (selectedOptions) => {
+    const selectedValues = selectedOptions.map(option => option.value);
+    setUpdateToolData({
+      ...updateToolData,
+      disasterTool: selectedValues,
+    });
+  };
   
-//   // Filter out existing disasters from the available options
-//   // Filter out existing disasters from the available options
-// const availableDisasters = allDisasters.filter(disaster => !updateAreaData.disasterProne.some(selectedDisaster => selectedDisaster.value === disaster.name));
+  // Filter out existing disasters from the available options
+  // Filter out existing disasters from the available options
+const availableDisasters = allDisasters.filter(disaster => !updateToolData.disasterTool.some(selectedDisaster => selectedDisaster.value === disaster.name));
 
   
-//   //DELETE FUNCTION
-//   const handleDeleteClick = async (row) => {
-//     try {
-//       const config = {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//           Authorization: `Bearer ${getToken()}`,
-//         },
-//       };
-//       // Send a DELETE request to the backend API
-//       const response = await axios.delete(`http://localhost:4001/api/v1/admin/area/${row._id}`, config);
+  //DELETE FUNCTION
+  const handleDeleteClick = async (row) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      };
+      // Send a DELETE request to the backend API
+      const response = await axios.delete(`http://localhost:4001/api/v1/admin/tool/${row._id}`, config);
 
-//       // Check if the deletion was successful
-//       if (response.data.success) {
-//         // Remove the deleted disaster from the state or refresh the data
-//         setDataRefresh(true); // Assuming you have a state variable to trigger data refresh
+      // Check if the deletion was successful
+      if (response.data.success) {
+        // Remove the deleted disaster from the state or refresh the data
+        setDataRefresh(true); // Assuming you have a state variable to trigger data refresh
 
-//         // Log success message
-//         console.log(response.data.message);
-//       } else {
-//         // Handle failure scenario
-//         console.error("Failed to delete area:", response.data.message);
-//       }
-//     } catch (error) {
-//       // Handle network or other errors
-//       console.error("Error deleting area:", error);
-//     }
-//   };
+        // Log success message
+        console.log(response.data.message);
+      } else {
+        // Handle failure scenario
+        console.error("Failed to delete tool:", response.data.message);
+      }
+    } catch (error) {
+      // Handle network or other errors
+      console.error("Error deleting tool:", error);
+    }
+  };
 
   const handleSelectChange = (selectedOptions) => {
     const selectedDisasters = selectedOptions.map(option => option.value);
@@ -389,47 +389,47 @@ function Tool() {
                   </Form>
                 </ModalBody>
               </Modal>
-              {/* <Modal isOpen={updateModalOpen} toggle={closeModalUpdate} className="modal-lg">
+              <Modal isOpen={updateModalOpen} toggle={closeModalUpdate} className="modal-lg">
                 <ModalHeader toggle={closeModalUpdate}>Update Area</ModalHeader>
                 <ModalBody>
                   <Form>
                     <FormGroup>
-                      <Label for="bname">Name</Label>
+                      <Label for="tname">Name</Label>
                       <Input
                         type="text"
-                        id="bname"
-                        value={updateAreaData.bname}
+                        id="tname"
+                        value={updateToolData.tname}
                         onChange={(e) =>
-                          setUpdateAreaData({ ...updateAreaData, bname: e.target.value })
+                          setUpdateToolData({ ...updateToolData, tname: e.target.value })
                         }
                       />
                     </FormGroup>
                     <FormGroup>
-                      <Label for="bdescription">Description</Label>
+                      <Label for="tdescription">Description</Label>
                       <Input
                         type="textarea"
-                        id="bdescription"
-                        value={updateAreaData.bdescription}
+                        id="tdescription"
+                        value={updateToolData.tdescription}
                         onChange={(e) =>
-                          setUpdateAreaData({
-                            ...updateAreaData,
-                            bdescription: e.target.value,
+                          setUpdateToolData({
+                            ...updateToolData,
+                            tdescription: e.target.value,
                           })
                         }
                       />
                     </FormGroup>
                     <FormGroup>
-                      <Label for="bimages">Images</Label>
+                      <Label for="timages">Images</Label>
                       <Input
                         type="file"
-                        id="bimages"
+                        id="timages"
                         multiple
                         onChange={handleImageChangeUpdate}
                         accept="image/*"
                       />
                        {
-                        updateAreaData.bimages && updateAreaData.bimages.length > 0 ? (
-                          updateAreaData.bimages.map((image, index) => (
+                        updateToolData.timages && updateToolData.timages.length > 0 ? (
+                          updateToolData.timages.map((image, index) => (
                             <img
                               key={index}
                               src={typeof image === 'string' ? image : image.url}
@@ -444,7 +444,7 @@ function Tool() {
   <Label for="updateDisasters">Disasters</Label>
   <Select
     options={availableDisasters.map(disaster => ({ value: disaster.name, label: disaster.name }))}
-    value={updateAreaData.disasterProne.map(disasterName => ({ value: disasterName, label: disasterName }))}
+    value={updateToolData.disasterTool.map(disasterName => ({ value: disasterName, label: disasterName }))}
     onChange={handleSelectChangeUpdate}
     isMulti
   />
@@ -454,7 +454,7 @@ function Tool() {
                     </Button>
                   </Form>
                 </ModalBody>
-              </Modal> */}
+              </Modal> 
               <CardBody>
                 <Table responsive>
                   <thead className="text-primary">
@@ -493,7 +493,7 @@ function Tool() {
                             </Fragment>
                           ))}
                         </td>
-                            {/* <td>
+                             <td>
                             <Button
                                 color="info"
                                 onClick={() => handleUpdateClick(row)}
@@ -508,7 +508,7 @@ function Tool() {
                             >
                                 Delete
                             </Button>
-                            </td> */}
+                            </td>
                       </tr>
                     ))}
                   </tbody>

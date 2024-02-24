@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require("../utils/multer");
 const {
-  newTool,getTool,updateTool,deleteTool
+  newTool,getTool,updateTool,deleteTool,getSingleTool
   } = require("../controllers/toolController");
 const { isAuthenticatedUser,authorizeRoles } = require('../middlewares/auth');
 
@@ -21,4 +21,5 @@ router
   authorizeRoles("admin"))
   .put(upload.array("timages", 10), updateTool)
   .delete(deleteTool);
+router.get("/tool/:id", getSingleTool);
 module.exports = router
