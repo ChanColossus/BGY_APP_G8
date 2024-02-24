@@ -423,10 +423,12 @@ const availableDisasters = allDisasters.filter(disaster => !updateMediaData.disa
       <tr key={index}>
        <td>
   {row.mvideo.length > 0 && (
-    <video controls autoPlay muted width="400" height="auto">
-      <source src={row.mvideo[0].url} type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+    <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
+      <video controls autoPlay muted style={{ maxWidth: '40%', height: 'auto' }}>
+        <source src={row.mvideo[0].url} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
   )}
 </td>
         <td><strong>{row.mname}</strong></td>
