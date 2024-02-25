@@ -140,3 +140,93 @@ exports.logout = async (req, res, next) => {
 //   await user.save();
 //   sendToken(user, 200, res);
 // };
+
+exports.getUserProfile = async (req, res, next) => {
+  // console.log(req.header('authorization'))
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+};
+
+// exports.updatePassword = async (req, res, next) => {
+//   const user = await User.findById(req.user.id).select("password");
+//   // Check previous user password
+//   const isMatched = await user.comparePassword(req.body.oldPassword);
+//   if (!isMatched) {
+//     return res.status(400).json({ message: "Old password is incorrect" });
+//   }
+//   user.password = req.body.password;
+//   await user.save();
+//   sendToken(user, 200, res);
+// };
+
+exports.updateProfile = async (req, res, next) => {
+  const userId = req.params.id;
+console.log(req.body)
+  try {
+    let userDataToUpdate = {
+      name: req.body.name,
+      email: req.body.email,
+      password: req.body.password,
+      contact: req.body.contact,
+      age: req.body.age,
+      gender: req.body.gender,
+      work: req.body.work,
+      role: req.body.role,
+    };
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "avatars",
+        width: 150,
+        crop: "scale",
+      });
+      userDataToUpdate.avatar = {
+        public_id: result.public_id,
+        url: result.secure_url,
+      };
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      userDataToUpdate,
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// exports.allUsers = async (req, res, next) => {
+//   const users = await User.find();
+//   res.status(200).json({
+//     success: true,
+//     users,
+//   });
+// };
+
+// exports.getUserDetails = async (req, res, next) => {
+//   const user = await User.findById(req.params.id);
+
+//   if (!user) {
+//     return res
+//       .status(400)
+//       .json({ message: `User does not found with id: ${req.params.id}` });
+//     // return next(new ErrorHandler(`User does not found with id: ${req.params.id}`))
+//   }
+
+//   res.status(200).json({
+//     success: true,
+//     user,
+//   });
+// };

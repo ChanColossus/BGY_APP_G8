@@ -1,30 +1,11 @@
-/*!
-
-=========================================================
-* Paper Dashboard React - v1.3.2
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/paper-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-* Licensed under MIT (https://github.com/creativetimofficial/paper-dashboard-react/blob/main/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-import React from "react";
-
-// reactstrap components
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
   CardTitle,
   FormGroup,
   Form,
@@ -32,168 +13,303 @@ import {
   Row,
   Col,
 } from "reactstrap";
+import { getToken } from "../../utils/helpers";
 
 function User() {
+  const [user, setUser] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    contact: '',
+    age: '',
+    gender: '',
+    work: '',
+    role: '',
+  });
+  const [avatarFile, setAvatarFile] = useState(null);
+  let navigate = useNavigate();
+
+  useEffect(() => {
+    const getProfile = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:4001/api/v1/me`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}`
+          }
+        });
+        setUser(data.user);
+        setFormData(prevData => ({
+          ...prevData,
+          name: data.user.name,
+          email: data.user.email,
+          contact: data.user.contact,
+          password:data.user.password,
+          age: data.user.age,
+          gender: data.user.gender,
+          work: data.user.work,
+          role: data.user.role,
+        }));
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getProfile();
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    setAvatarFile(file);
+  };
+
+  const updateProfile = async (e) => {
+    e.preventDefault();
+    const userId = user._id;
+    
+    const updatedData = { ...formData };
+
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${getToken()}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    };
+
+    const formDataToUpdate = new FormData();
+    Object.keys(updatedData).forEach(key => {
+      formDataToUpdate.append(key, updatedData[key]);
+    });
+    if (avatarFile) {
+      formDataToUpdate.append('avatar', avatarFile);
+    }
+
+    try {
+      await axios.put(`http://localhost:4001/api/v1/me/update/${userId}`, formDataToUpdate, config);
+      console.log("Profile updated successfully!");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
   return (
-    <>
-      <div className="content">
+    <div className="content">
+      {user && (
         <Row>
-          <Col md="4">
-            <Card className="card-user">
-              <div className="image">
-                <img alt="..." src={require("assets/img/damir-bosnjak.jpg")} />
-              </div>
-              <CardBody>
-                <div className="author">
-                  <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                    <img
-                      alt="..."
-                      className="avatar border-gray"
-                      src={require("assets/img/mike.jpg")}
-                    />
-                    <h5 className="title">Chet Faker</h5>
-                  </a>
-                  <p className="description">@chetfaker</p>
-                </div>
-                <p className="description text-center">
-                  "I like the way you work it <br />
-                  No diggity <br />I wanna bag it up"
-                </p>
-              </CardBody>
-             
-            </Card>
-            
-           
-          </Col>
+           <Col md="4">
+              <Card className="card-user">
+              <div className="image" style={{ backgroundColor: '#007bff' }}>
+  {/* Remove the img tag */}
+</div>
+                <CardBody>
+                  <div className="author">
+                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                      <img
+                        alt="..."
+                        className="avatar border-gray"
+                        src={user.avatar.url} // Display user avatar from userProfile
+                      />
+                      <h5 className="title">{user.name}</h5> {/* Display user name from userProfile */}
+                    </a>
+                    <p className="description">{user.age}</p> {/* Display username from userProfile */}
+                  </div>
+                  <p className="description text-center">
+                    {user.work}
+                  </p>
+                </CardBody>
+              </Card>
+            </Col>
           <Col md="8">
             <Card className="card-user">
               <CardHeader>
                 <CardTitle tag="h5">Edit Profile</CardTitle>
               </CardHeader>
               <CardBody>
-                <Form>
-                  <Row>
-                    <Col className="pr-1" md="5">
-                      <FormGroup>
-                        <label>Company (disabled)</label>
-                        <Input
-                          defaultValue="Creative Code Inc."
-                          disabled
-                          placeholder="Company"
-                          type="text"
-                        />
-                      </FormGroup>
-                    </Col>
-                    <Col className="px-1" md="3">
-                      <FormGroup>
-                        <label>Username</label>
-                        <Input
-                          defaultValue="michael23"
-                          placeholder="Username"
-                          type="text"
-                        />
-                      </FormGroup>
-                    </Col>
-                    <Col className="pl-1" md="4">
-                      <FormGroup>
-                        <label htmlFor="exampleInputEmail1">
-                          Email address
-                        </label>
-                        <Input placeholder="Email" type="email" />
-                      </FormGroup>
-                    </Col>
-                  </Row>
+                <Form onSubmit={updateProfile}>
                   <Row>
                     <Col className="pr-1" md="6">
                       <FormGroup>
-                        <label>First Name</label>
+                        <label>Email</label>
                         <Input
-                          defaultValue="Chet"
-                          placeholder="Company"
+                          name="email"
+                          value={formData.email}
+                          disabled
+                          placeholder="Email"
                           type="text"
                         />
                       </FormGroup>
                     </Col>
                     <Col className="pl-1" md="6">
                       <FormGroup>
-                        <label>Last Name</label>
+                        <label>Name</label>
                         <Input
-                          defaultValue="Faker"
-                          placeholder="Last Name"
+                          name="name"
+                          value={formData.name}
+                          placeholder="Name"
                           type="text"
+                          onChange={handleInputChange}
                         />
                       </FormGroup>
                     </Col>
                   </Row>
                   <Row>
-                    <Col md="12">
+                    <Col className="pr-1" md="6">
                       <FormGroup>
-                        <label>Address</label>
+                        <label>Contact</label>
                         <Input
-                          defaultValue="Melbourne, Australia"
-                          placeholder="Home Address"
-                          type="text"
+                          name="contact"
+                          value={formData.contact}
+                          placeholder="Contact"
+                          type="number"
+                          onChange={handleInputChange}
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col className="pl-1" md="6">
+                      <FormGroup>
+                        <label>Age</label>
+                        <Input
+                          name="age"
+                          value={formData.age}
+                          placeholder="Age"
+                          type="number"
+                          onChange={handleInputChange}
                         />
                       </FormGroup>
                     </Col>
                   </Row>
                   <Row>
-                    <Col className="pr-1" md="4">
+                    <Col className="pr-1" md="6">
                       <FormGroup>
-                        <label>City</label>
+                        <label>Gender</label>
                         <Input
-                          defaultValue="Melbourne"
-                          placeholder="City"
-                          type="text"
-                        />
+                          type="select"
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleInputChange}
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Rather not say">Rather not say</option>
+                        </Input>
                       </FormGroup>
                     </Col>
-                    <Col className="px-1" md="4">
+                    <Col className="pl-1" md="6">
                       <FormGroup>
-                        <label>Country</label>
+                        <label>Work</label>
                         <Input
-                          defaultValue="Australia"
-                          placeholder="Country"
-                          type="text"
-                        />
-                      </FormGroup>
-                    </Col>
-                    <Col className="pl-1" md="4">
-                      <FormGroup>
-                        <label>Postal Code</label>
-                        <Input placeholder="ZIP Code" type="number" />
+                          type="select"
+                          name="work"
+                          value={formData.work}
+                          onChange={handleInputChange}
+                        >
+                          <option value="Student">Student</option>
+                          <option value="Teacher">Teacher</option>
+                          <option value="Others">Others</option>
+                        </Input>
                       </FormGroup>
                     </Col>
                   </Row>
                   <Row>
-                    <Col md="12">
+                    <Col className="pr-1" md="6">
                       <FormGroup>
-                        <label>About Me</label>
+                        <label>Password</label>
                         <Input
-                          type="textarea"
-                          defaultValue="Oh so, your weak rhyme You doubt I'll bother, reading into it"
+                          name="password"
+                          value={formData.password}
+                          placeholder="Password"
+                          type="password"
+                          onChange={handleInputChange}
                         />
+                      </FormGroup>
+                    </Col>
+                    <Col className="pl-1" md="6">
+                      <FormGroup>
+                        <label>Role</label>
+                        <Input
+                          type="select"
+                          name="role"
+                          value={formData.role}
+                          disabled
+                          onChange={handleInputChange}
+                        >
+                          <option value="Admin">Admin</option>
+                          <option value="User">User</option>
+                        </Input>
                       </FormGroup>
                     </Col>
                   </Row>
                   <Row>
-                    <div className="update ml-auto mr-auto">
-                      <Button
-                        className="btn-round"
-                        color="primary"
-                        type="submit"
-                      >
+                    <Col className="pr-1" md="6">
+                      <FormGroup>
+                        <label>Created At</label>
+                        <Input
+                          name="createdAt"
+                          value={user.createdAt}
+                          disabled
+                          placeholder="Created At"
+                          type="text"
+                        />
+                      </FormGroup>
+                    </Col>
+                    <Col className="pl-1" md="6">
+                      <FormGroup>
+                        <label>Avatar</label>
+                        <div className="d-flex align-items-center">
+                          <Input
+                            type="file"
+                            onChange={handleAvatarChange}
+                            style={{ display: 'none' }}
+                            id="avatar-input"
+                            accept="image/*"
+                          />
+                          <label htmlFor="avatar-input" className="btn btn-primary mb-0 mr-2">Choose File</label>
+                          <div className="position-relative">
+                            {avatarFile && (
+                              <img
+                                src={URL.createObjectURL(avatarFile)}
+                                alt="Avatar"
+                                className="avatar-preview mr-2 border rounded" // Add border class
+                                style={{ width: '100px', height: '100px' }} // Adjust width and height
+                              />
+                            )}
+                            {user.avatar && !avatarFile && (
+                              <img
+                                src={user.avatar.url}
+                                alt="Avatar"
+                                className="avatar-preview mr-2 border rounded" // Add border class
+                                style={{ width: '100px', height: '100px' }} // Adjust width and height
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </FormGroup>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col md="12" className="text-center">
+                      <Button className="btn-round" color="primary" type="submit">
                         Update Profile
                       </Button>
-                    </div>
+                    </Col>
                   </Row>
                 </Form>
               </CardBody>
             </Card>
           </Col>
         </Row>
-      </div>
-    </>
+      )}
+    </div>
   );
 }
 
