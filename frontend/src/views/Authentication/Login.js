@@ -36,7 +36,10 @@ const Login = () => {
                 const role = getUserRole(); // Get the role from session storage
                 if (role === 'admin') {
                     navigate("/admin/dashboard"); // Redirect admin to /admin/dashboard
-                } else {
+                } 
+                else if (role === 'employee') {
+                  navigate("/employee/dashboard"); // Redirect admin to /admin/dashboard
+              }else {
                     navigate("/home/user"); // Redirect user to /home/user
                 }
             }, 3000); // Hide alert after 3 seconds

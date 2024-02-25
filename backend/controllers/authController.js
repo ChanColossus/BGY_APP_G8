@@ -207,26 +207,99 @@ console.log(req.body)
   }
 };
 
-// exports.allUsers = async (req, res, next) => {
-//   const users = await User.find();
-//   res.status(200).json({
-//     success: true,
-//     users,
-//   });
-// };
+exports.allUsers = async (req, res, next) => {
+  const users = await User.find();
+  res.status(200).json({
+    success: true,
+    users,
+  });
+};
 
-// exports.getUserDetails = async (req, res, next) => {
-//   const user = await User.findById(req.params.id);
+exports.getUserDetails = async (req, res, next) => {
+  const user = await User.findById(req.params.id);
 
-//   if (!user) {
-//     return res
-//       .status(400)
-//       .json({ message: `User does not found with id: ${req.params.id}` });
-//     // return next(new ErrorHandler(`User does not found with id: ${req.params.id}`))
-//   }
+  if (!user) {
+    return res
+      .status(400)
+      .json({ message: `User does not found with id: ${req.params.id}` });
+    // return next(new ErrorHandler(`User does not found with id: ${req.params.id}`))
+  }
 
-//   res.status(200).json({
-//     success: true,
-//     user,
-//   });
-// };
+  res.status(200).json({
+    success: true,
+    user,
+  });
+};
+exports.deleteUser = async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+  res.status(200).json({
+    success: true,
+    message: "User deleted",
+  });
+};
+exports.updateUserRoleToEmployee = async (req, res, next) => {
+  const userId = req.params.id;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the user's role to "employee"
+    user.role = "employee";
+    await user.save();
+
+    res.status(200).json({ success: true, message: "User role updated to employee" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+exports.updateUserRoleToAdmin = async (req, res, next) => {
+  const userId = req.params.id;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the user's role to "employee"
+    user.role = "admin";
+    await user.save();
+
+    res.status(200).json({ success: true, message: "User role updated to admin" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+exports.updateUserRoleToUser = async (req, res, next) => {
+  const userId = req.params.id;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the user's role to "employee"
+    user.role = "user";
+    await user.save();
+
+    res.status(200).json({ success: true, message: "User role updated to admin" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

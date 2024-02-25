@@ -8,6 +8,7 @@ import "assets/demo/demo.css";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
 import AdminLayout from "layouts/Admin.js";
+import EmployeeLayout from "layouts/Employee.js";
 import AuthLayout from "layouts/Auth.js";
 import ProtectedRoute from "ProtectedRoute";
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -17,6 +18,7 @@ root.render(
     <Routes>
     <Route path="/home/user" element={<LandingPage />}  />
       <Route path="/auth/*" element={<AuthLayout />} />
+      <Route path="/employee/*" element={<ProtectedRoute><EmployeeLayout /></ProtectedRoute>} />
       <Route path="/admin/*" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/auth/login" replace />} />
     </Routes>
