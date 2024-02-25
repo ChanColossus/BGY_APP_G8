@@ -13,7 +13,7 @@ router.get("/media/:id", getSingleMedia);
 router
   .route("/admin/media/:id", isAuthenticatedUser, 
   authorizeRoles("admin"))
-  .put(upload.single("mvideo"), updateMedia)
+  .put(upload.array("mvideo"), updateMedia)
   .delete(deleteMedia);
 module.exports = router;
 

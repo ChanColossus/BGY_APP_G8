@@ -187,18 +187,26 @@ function Infographic() {
     setUpdateModalOpen(false);
   };
   
-  const handleVideoChangeUpdate = (e) => {
+// Updated handleVideoChangeUpdate function
+const handleVideoChangeUpdate = (e) => {
     const files = Array.from(e.target.files);
+    console.log("Files:", files); // Log files array to check the selected files
+  
     const videoPreviews = [];
   
     const readAndPreview = (file) => {
       const reader = new FileReader();
   
       reader.onload = (event) => {
-        videoPreviews.push(event.target.result);
-        setUpdateMediaData(prevState => ({
+        const previewUrl = URL.createObjectURL(file);
+         // Create preview URL for the current file
+        console.log("Preview URL:", previewUrl); // Log preview URL to check if it's generated correctly
+        videoPreviews.push(event.target.result); // Push the preview URL to the array
+        console.log("Video Previews:", videoPreviews); // Log videoPreviews array to check the preview URLs
+        setUpdateMediaData((prevState) => ({
           ...prevState,
           mvideo: videoPreviews,
+          videoPreviews: videoPreviews, // Update videoPreviews with the new array of preview URLs
         }));
       };
   
@@ -208,15 +216,9 @@ function Infographic() {
     files.forEach(readAndPreview);
   };
   
+  // Updated handleUpdateSubmit function
   const handleUpdateSubmit = async () => {
     try {
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${getToken()}`,
-        },
-      };
-  
       const formData = new FormData();
       formData.append("mname", updateMediaData.mname);
   
@@ -224,8 +226,7 @@ function Infographic() {
         formData.append("disasterNames", disaster);
       });
   
-      // Check if new videos are uploaded
-      if (Array.isArray(updateMediaData.mvideo) && updateMediaData.mvideo.length > 0) {
+      if (Array.isArray(updateMediaData.mvideo)) {
         updateMediaData.mvideo.forEach((video, index) => {
           if (video instanceof File) {
             formData.append(`mvideo[${index}]`, video);
@@ -235,17 +236,17 @@ function Infographic() {
         });
       }
   
-      const response = await axios.put(`http://localhost:4001/api/v1/admin/media/${updateId}`, formData, config);
-      setDataRefresh(true);
-      console.log(formData);
+      const response = await axios.put(`http://localhost:4001/api/v1/admin/media/${updateId}`, formData);
       console.log(response.data);
   
       closeModalUpdate();
+  
+      // Auto refresh the page after the modal is closed
+      window.location.reload();
     } catch (error) {
       console.error("Error submitting update form:", error);
     }
   };
-  
   const handleSelectChangeUpdate = (selectedOptions) => {
     const selectedValues = selectedOptions.map(option => option.value);
     setUpdateMediaData({
@@ -383,17 +384,20 @@ const availableDisasters = allDisasters.filter(disaster => !updateMediaData.disa
     id="mvideo"
     multiple
     onChange={handleVideoChangeUpdate}
-    accept="video/*" // Specify accepted file types as video
+    accept="video/*"
   />
-  {updateMediaData.mvideo && updateMediaData.mvideo.length > 0 ? (
-    updateMediaData.mvideo.map((video, index) => (
-      <video key={index} controls autoPlay muted width="400" height="auto">
-        <source src={video.url} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+  {updateMediaData.videoPreviews && updateMediaData.videoPreviews.length > 0 ? (
+    updateMediaData.videoPreviews.map((preview, index) => (
+      <div key={index}>
+        <video controls autoPlay muted width="400" height="auto">
+          <source src={preview} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
     ))
   ) : null}
 </FormGroup>
+
                     <FormGroup>
   <Label for="updateDisasters">Disasters</Label>
   <Select
@@ -423,8 +427,8 @@ const availableDisasters = allDisasters.filter(disaster => !updateMediaData.disa
       <tr key={index}>
        <td>
   {row.mvideo.length > 0 && (
-    <div style={{ maxWidth: '100%', overflow: 'hidden' }}>
-      <video controls autoPlay muted style={{ maxWidth: '40%', height: 'auto' }}>
+    <div style={{ width: '40%', overflow: 'hidden' }}>
+      <video controls autoPlay muted style={{ maxWidth: '100%', height: 'auto' }}>
         <source src={row.mvideo[0].url} type="video/mp4" />
         Your browser does not support the video tag.
       </video>

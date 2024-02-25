@@ -1,6 +1,6 @@
 const Media = require('../models/media');
 const Disaster = require("../models/disaster");
-const cloudinary = require("cloudinary").v2;
+const cloudinary = require("cloudinary");
 const APIFeatures = require("../utils/apiFeatures");
 exports.newMedia = async (req, res, next) => {
     const { mname, disasterNames } = req.body;
@@ -115,31 +115,84 @@ exports.deleteMedia = async (req, res, next) => {
     });
 };
 
-exports.updateMedia = async (req, res) => {
+exports.updateMedia = async (req, res, next) => {
     const { id } = req.params;
     const { mname, disasterNames } = req.body;
-    let mvideo = [];
-  
+    let mvideo = req.body.mvideo; // Ensure to parse the incoming images correctly
+    console.log(req.files);
+    console.log(id);
+
     try {
-      const existingMedia = await Media.findById(id);
-  
-      if (!existingMedia) {
-        return res.status(404).json({ message: 'Media not found' });
-      }
-  
-      // Check if new videos are uploaded
-      if (req.files && req.files.length > 0) {
-        mvideo = req.files.map(file => ({ url: file.path }));
-      } else {
-        // Retain existing videos if no new videos are uploaded
-        mvideo = existingMedia.mvideo;
-      }
-  
-      // Update media
-      const updatedMedia = await Media.findByIdAndUpdate(id, { mname, mvideo, disasterProne: disasterNames }, { new: true });
-  
-      res.json(updatedMedia);
+        let media = await Media.findById(id);
+        // Check if disasterNames is an array
+        let disasters;
+        if (Array.isArray(disasterNames)) {
+            // Fetch disasters based on the provided disasterNames
+            disasters = await Disaster.find({ name: { $in: disasterNames } });
+
+            // Check if all provided disasterNames correspond to valid disasters
+            if (disasters.length !== disasterNames.length) {
+                return res.status(400).json({ error: 'Invalid disasterName provided' });
+            }
+        } else {
+            // If disasterNames is not an array, handle it as a single disaster name
+            const singleDisaster = await Disaster.findOne({ name: disasterNames });
+
+            // Check if the single disaster name is valid
+            if (!singleDisaster) {
+                return res.status(400).json({ error: 'Invalid disasterName provided' });
+            }
+
+            disasters = [singleDisaster];
+        }
+
+        // Image upload logic (similar to createArea)
+        // Check if images are present in the request body
+        if (req.body.mvideo !== undefined && req.body.mvideo.length > 0) {
+            let videoLinks = [];
+            // Upload new images to cloudinary
+            for (let i = 0; i < req.body.mvideo.length; i++) {
+                const result = await cloudinary.v2.uploader.upload(
+                    req.body.mvideo[i],
+                    {
+                        folder: "media",
+                        resource_type: 'video'
+                    }
+                );
+                videoLinks.push({
+                    public_id: result.public_id,
+                    url: result.secure_url,
+                });
+            }
+
+            mvideo = videoLinks;
+        } else {
+            // If images are not present in the request body, retain the existing images
+            mvideo = media.mvideo;
+        }
+
+        // Update the Area with the associated disasters and uploaded images
+        const updatedIg = await Media.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    mname,
+                    disasterProne: disasters.map((disaster) => ({
+                        name: disaster.name,
+                    })),
+                    mvideo: mvideo,
+                },
+            },
+            { new: true }
+        );
+
+        if (!updatedIg) {
+            return res.status(404).json({ error: 'Ig not found' });
+        }
+
+        return res.json(updatedIg);
     } catch (error) {
-      res.status(400).json({ message: error.message });
+        console.error('Error updating Ig:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
-  };
+};
