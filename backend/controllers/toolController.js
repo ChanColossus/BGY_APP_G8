@@ -109,6 +109,7 @@ exports.getTool = async (req, res, next) => {
 };
 exports.updateTool = async (req, res, next) => {
     const { toolId } = req.params;
+<<<<<<< HEAD
     const { tname, tdescription, disasterNames } = req.body;
     let timages = req.body.timages; // Ensure to parse the incoming images correctly
     console.log(req.files);
@@ -116,6 +117,13 @@ exports.updateTool = async (req, res, next) => {
 
     try {
         let tool = await Tool.findById(toolId);
+=======
+    const { tname, tdescription, disasterNames, timages } = req.body;
+    console.log(req.files)
+    console.log(toolId)
+
+    try {
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
         // Check if disasterNames is an array
         let disasters;
         if (Array.isArray(disasterNames)) {
@@ -139,6 +147,7 @@ exports.updateTool = async (req, res, next) => {
         }
 
         // Image upload logic (similar to createArea)
+<<<<<<< HEAD
         // Check if images are present in the request body
         if (req.body.timages !== undefined && req.body.timages.length > 0) {
             let imagesLinks = [];
@@ -160,6 +169,35 @@ exports.updateTool = async (req, res, next) => {
         } else {
             // If images are not present in the request body, retain the existing images
             timages = tool.timages;
+=======
+        let timages = [];
+        if (!req.files) {
+            timages.push(req.file);
+        } else {
+            timages = req.files;
+        }
+
+        let timagesLinks = [];
+
+        for (let i = 0; i < timages.length; i++) {
+            let timageDataUri = timages[i].path;
+
+            try {
+                const result = await cloudinary.v2.uploader.upload(timageDataUri, {
+                    folder: 'tool',
+                    width: 150,
+                    crop: 'scale',
+                });
+
+                timagesLinks.push({
+                    public_id: result.public_id,
+                    url: result.secure_url,
+                });
+            } catch (error) {
+                console.log('Error uploading image:', error);
+                return res.status(500).json({ error: 'Error uploading image' });
+            }
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
         }
 
         // Update the Area with the associated disasters and uploaded images
@@ -172,6 +210,7 @@ exports.updateTool = async (req, res, next) => {
                     disasterTool: disasters.map((disaster) => ({
                         name: disaster.name,
                     })),
+<<<<<<< HEAD
                     timages: timages,
                 },
             },
@@ -189,6 +228,24 @@ exports.updateTool = async (req, res, next) => {
     }
 };
 
+=======
+                    timages: timagesLinks,
+                },
+            },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedTool) {
+            return res.status(404).json({ error: 'Tool not found' });
+        }
+
+        return res.json(updatedTool);s
+    } catch (error) {
+        console.error('Error updating tool:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
 exports.deleteTool = async (req, res, next) => {
     const tool = await Tool.findByIdAndDelete(req.params.toolId);
     if (!tool) {
@@ -201,6 +258,7 @@ exports.deleteTool = async (req, res, next) => {
         success: true,
         message: "Tool deleted",
     });
+<<<<<<< HEAD
 };
 
 exports.getSingleTool = async (req, res, next) => {
@@ -217,3 +275,6 @@ exports.getSingleTool = async (req, res, next) => {
       tool
     });
   };
+=======
+};
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a

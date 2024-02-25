@@ -168,6 +168,7 @@ function Tool() {
   };
 
    //UPDATE FUNCTIONS
+<<<<<<< HEAD
    const handleUpdateClick = async (row) => {
     setUpdateId(row._id);
     try {
@@ -296,6 +297,136 @@ const availableDisasters = allDisasters.filter(disaster => !updateToolData.disas
       console.error("Error deleting tool:", error);
     }
   };
+=======
+//    const handleUpdateClick = async (row) => {
+//     setUpdateId(row._id);
+//     try {
+      
+//       const apiUrl = `http://localhost:4001/api/v1/area/${row._id}`;
+//       console.log("API URL:", apiUrl);
+//       const response = await axios.get(apiUrl);
+//       // Ensure to set the correct keys for updateAreaData
+//       setUpdateAreaData({
+//         bname: response.data.area.bname,
+//         bdescription: response.data.area.bdescription,
+//         bimages: response.data.area.bimages,
+//         disasterProne: response.data.area.disasterProne.map(disaster => disaster.name),
+//       });
+  
+//       console.log(updateAreaData); // This may not reflect the updated state immediately due to closure
+//       setUpdateModalOpen(true);
+//     } catch (error) {
+//       console.error("Error fetching area data for update:", error);
+//     }
+//   };
+  
+//   const closeModalUpdate = () => {
+//     setUpdateModalOpen(false);
+//   };
+  
+//   const handleImageChangeUpdate = (e) => {
+//     const files = Array.from(e.target.files);
+//     const imagePreviews = [];
+
+//     const readAndPreview = (file) => {
+//       const reader = new FileReader();
+
+//       reader.onload = (event) => {
+//         imagePreviews.push(event.target.result);
+//         setUpdateAreaData(prevState => ({
+//           ...prevState,
+//           bimages: imagePreviews,
+//         }));
+//       };
+
+//       reader.readAsDataURL(file);
+//     };
+
+//     files.forEach(readAndPreview);
+// };
+  
+// const handleUpdateSubmit = async () => {
+//   try {
+//     const config = {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//         Authorization: `Bearer ${getToken()}`,
+//       },
+//     };
+
+//     const formData = new FormData();
+//     formData.append("bname", updateAreaData.bname);
+//     formData.append("bdescription", updateAreaData.bdescription);
+
+//     updateAreaData.disasterProne.forEach((disaster) => {
+//       formData.append("disasterNames", disaster);
+//     });
+
+//     // Check if new images are uploaded
+//     if (Array.isArray(updateAreaData.bimages)) {
+//       updateAreaData.bimages.forEach((image, index) => {
+//         if (image instanceof File) {
+//           formData.append(`bimages[${index}]`, image);
+//         } else if (typeof image === 'string') {
+//           formData.append(`bimages[${index}]`, image);
+//         }
+//       });
+//     }
+
+//     const response = await axios.put(`http://localhost:4001/api/v1/admin/area/${updateId}`, formData, config);
+//     setDataRefresh(true);
+
+//     console.log(formData)
+//     console.log(response.data);
+
+//     closeModalUpdate();
+//   } catch (error) {
+//     console.error("Error submitting update form:", error);
+//   }
+// };
+  
+//   const handleSelectChangeUpdate = (selectedOptions) => {
+//     const selectedValues = selectedOptions.map(option => option.value);
+//     setUpdateAreaData({
+//       ...updateAreaData,
+//       disasterProne: selectedValues,
+//     });
+//   };
+  
+//   // Filter out existing disasters from the available options
+//   // Filter out existing disasters from the available options
+// const availableDisasters = allDisasters.filter(disaster => !updateAreaData.disasterProne.some(selectedDisaster => selectedDisaster.value === disaster.name));
+
+  
+//   //DELETE FUNCTION
+//   const handleDeleteClick = async (row) => {
+//     try {
+//       const config = {
+//         headers: {
+//           "Content-Type": "multipart/form-data",
+//           Authorization: `Bearer ${getToken()}`,
+//         },
+//       };
+//       // Send a DELETE request to the backend API
+//       const response = await axios.delete(`http://localhost:4001/api/v1/admin/area/${row._id}`, config);
+
+//       // Check if the deletion was successful
+//       if (response.data.success) {
+//         // Remove the deleted disaster from the state or refresh the data
+//         setDataRefresh(true); // Assuming you have a state variable to trigger data refresh
+
+//         // Log success message
+//         console.log(response.data.message);
+//       } else {
+//         // Handle failure scenario
+//         console.error("Failed to delete area:", response.data.message);
+//       }
+//     } catch (error) {
+//       // Handle network or other errors
+//       console.error("Error deleting area:", error);
+//     }
+//   };
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
 
   const handleSelectChange = (selectedOptions) => {
     const selectedDisasters = selectedOptions.map(option => option.value);
@@ -389,11 +520,16 @@ const availableDisasters = allDisasters.filter(disaster => !updateToolData.disas
                   </Form>
                 </ModalBody>
               </Modal>
+<<<<<<< HEAD
               <Modal isOpen={updateModalOpen} toggle={closeModalUpdate} className="modal-lg">
+=======
+              {/* <Modal isOpen={updateModalOpen} toggle={closeModalUpdate} className="modal-lg">
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
                 <ModalHeader toggle={closeModalUpdate}>Update Area</ModalHeader>
                 <ModalBody>
                   <Form>
                     <FormGroup>
+<<<<<<< HEAD
                       <Label for="tname">Name</Label>
                       <Input
                         type="text"
@@ -401,10 +537,20 @@ const availableDisasters = allDisasters.filter(disaster => !updateToolData.disas
                         value={updateToolData.tname}
                         onChange={(e) =>
                           setUpdateToolData({ ...updateToolData, tname: e.target.value })
+=======
+                      <Label for="bname">Name</Label>
+                      <Input
+                        type="text"
+                        id="bname"
+                        value={updateAreaData.bname}
+                        onChange={(e) =>
+                          setUpdateAreaData({ ...updateAreaData, bname: e.target.value })
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
                         }
                       />
                     </FormGroup>
                     <FormGroup>
+<<<<<<< HEAD
                       <Label for="tdescription">Description</Label>
                       <Input
                         type="textarea"
@@ -414,22 +560,45 @@ const availableDisasters = allDisasters.filter(disaster => !updateToolData.disas
                           setUpdateToolData({
                             ...updateToolData,
                             tdescription: e.target.value,
+=======
+                      <Label for="bdescription">Description</Label>
+                      <Input
+                        type="textarea"
+                        id="bdescription"
+                        value={updateAreaData.bdescription}
+                        onChange={(e) =>
+                          setUpdateAreaData({
+                            ...updateAreaData,
+                            bdescription: e.target.value,
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
                           })
                         }
                       />
                     </FormGroup>
                     <FormGroup>
+<<<<<<< HEAD
                       <Label for="timages">Images</Label>
                       <Input
                         type="file"
                         id="timages"
+=======
+                      <Label for="bimages">Images</Label>
+                      <Input
+                        type="file"
+                        id="bimages"
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
                         multiple
                         onChange={handleImageChangeUpdate}
                         accept="image/*"
                       />
                        {
+<<<<<<< HEAD
                         updateToolData.timages && updateToolData.timages.length > 0 ? (
                           updateToolData.timages.map((image, index) => (
+=======
+                        updateAreaData.bimages && updateAreaData.bimages.length > 0 ? (
+                          updateAreaData.bimages.map((image, index) => (
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
                             <img
                               key={index}
                               src={typeof image === 'string' ? image : image.url}
@@ -444,7 +613,11 @@ const availableDisasters = allDisasters.filter(disaster => !updateToolData.disas
   <Label for="updateDisasters">Disasters</Label>
   <Select
     options={availableDisasters.map(disaster => ({ value: disaster.name, label: disaster.name }))}
+<<<<<<< HEAD
     value={updateToolData.disasterTool.map(disasterName => ({ value: disasterName, label: disasterName }))}
+=======
+    value={updateAreaData.disasterProne.map(disasterName => ({ value: disasterName, label: disasterName }))}
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
     onChange={handleSelectChangeUpdate}
     isMulti
   />
@@ -454,7 +627,11 @@ const availableDisasters = allDisasters.filter(disaster => !updateToolData.disas
                     </Button>
                   </Form>
                 </ModalBody>
+<<<<<<< HEAD
               </Modal> 
+=======
+              </Modal> */}
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
               <CardBody>
                 <Table responsive>
                   <thead className="text-primary">
@@ -493,7 +670,11 @@ const availableDisasters = allDisasters.filter(disaster => !updateToolData.disas
                             </Fragment>
                           ))}
                         </td>
+<<<<<<< HEAD
                              <td>
+=======
+                            {/* <td>
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
                             <Button
                                 color="info"
                                 onClick={() => handleUpdateClick(row)}
@@ -508,7 +689,11 @@ const availableDisasters = allDisasters.filter(disaster => !updateToolData.disas
                             >
                                 Delete
                             </Button>
+<<<<<<< HEAD
                             </td>
+=======
+                            </td> */}
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
                       </tr>
                     ))}
                   </tbody>

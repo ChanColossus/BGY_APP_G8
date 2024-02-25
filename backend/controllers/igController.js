@@ -86,6 +86,7 @@ exports.newIg = async (req, res, next) => {
         console.error('Error creating area:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
     }
+<<<<<<< HEAD
 };
 exports.getSingleIg = async (req, res, next) => {
     const ig = await Ig.findById(req.params.id);
@@ -211,4 +212,6 @@ exports.updateIg = async (req, res, next) => {
         console.error('Error updating Ig:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
     }
+=======
+>>>>>>> 0a83a8e43be353d042e4fe561c49ddb94c70531a
 };
